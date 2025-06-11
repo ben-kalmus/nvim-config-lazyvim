@@ -28,6 +28,54 @@ map.set({ "n", "v" }, "-", "_", { noremap = true })
 map.set({ "n", "v" }, "zl", "zL", { noremap = true })
 map.set({ "n", "v" }, "zh", "zH", { noremap = true })
 
+-- Git
+map.set({ "n", "v" }, "<leader>gn", function()
+    require("fzf-lua").git_blame()
+end, { noremap = true, silent = true, desc = "Git FZF Blame buffer" })
+map.set({ "n", "v" }, "<leader>gs", function()
+    require("fzf-lua").git_status()
+end, { noremap = true, silent = true, desc = "Git FZF status" })
+map.set({ "n", "v" }, "<leader>gC", function()
+    require("fzf-lua").git_status()
+end, { noremap = true, silent = true, desc = "Git buffer commit log" })
+
+-- DiffView
+map.set(
+    { "n", "v" },
+    "<leader>gH",
+    [[:DiffviewFileHistory<CR>]],
+    { noremap = true, silent = true, desc = "DiffView File History (selection)" }
+)
+map.set({ "n", "v" }, "<leader>DD", [[:DiffviewClose<CR>]], { noremap = true, silent = true, desc = "DiffViewClose" })
+map.set({ "n", "v" }, "<leader>DO", [[:DiffviewOpen<CR>]], { noremap = true, silent = true, desc = "DiffViewOpen" })
+
+-- persistent breakpoints plugin
+-- Save breakpoints to file automatically.
+map.set(
+    { "n", "v" },
+    "<leader>dd",
+    "<cmd>lua require('persistent-breakpoints.api').toggle_breakpoint()<cr>",
+    { noremap = true, silent = true, desc = "Toggle Breakpoint" }
+)
+map.set(
+    { "n", "v" },
+    "<leader>dD",
+    "<cmd>lua require('persistent-breakpoints.api').set_conditional_breakpoint()<cr>",
+    { noremap = true, silent = true, desc = "Breakpoint Condition" }
+)
+map.set(
+    { "n", "v" },
+    "<leader>dX",
+    "<cmd>lua require('persistent-breakpoints.api').clear_all_breakpoints()<cr>",
+    { noremap = true, silent = true, desc = "Clear all breakpoints" }
+)
+map.set(
+    { "n", "v" },
+    "<leader>df",
+    "<cmd>lua require('persistent-breakpoints.api').set_log_point()<cr>",
+    { noremap = true, silent = true, desc = "Set Log Point" }
+)
+
 -- Add custom command to reload key mapping file
 vim.api.nvim_create_user_command("ReloadKeymaps", "luafile ~/.config/nvim/lua/config/keymaps.lua", {})
 vim.api.nvim_create_user_command("ReloadOptions", "luafile ~/.config/nvim/lua/config/options.lua", {})
