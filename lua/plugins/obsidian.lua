@@ -1,6 +1,6 @@
 return {
     "epwalsh/obsidian.nvim",
-    enabled = false, -- !!!DISABLED!!!
+    -- enabled = false, -- !!!DISABLED!!!
 
     version = "*", -- recommended, use latest release instead of latest commit
     lazy = true,
@@ -20,13 +20,12 @@ return {
     },
     opts = {
         ui = {
-            -- enable = false,
-            enable = true,
+            enable = false,
         },
         workspaces = {
             {
-                name = "Notes",
-                path = "~/notes-vault/personal",
+                name = "notes",
+                path = "~/notes-vault",
             },
         },
         daily_notes = {
