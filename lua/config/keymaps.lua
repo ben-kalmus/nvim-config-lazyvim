@@ -28,6 +28,10 @@ map.set({ "n", "v" }, "-", "_", { noremap = true })
 map.set({ "n", "v" }, "zl", "zL", { noremap = true })
 map.set({ "n", "v" }, "zh", "zH", { noremap = true })
 
+-- Insert mode settings
+-- outdent line to the left
+vim.keymap.set("i", "<S-Tab>", "<C-d>", { desc = "Outdent line" })
+
 -- Git
 map.set({ "n", "v" }, "<leader>gn", function()
     require("fzf-lua").git_blame()

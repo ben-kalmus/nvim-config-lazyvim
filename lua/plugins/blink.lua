@@ -1,11 +1,28 @@
 return {
     "saghen/blink.cmp",
-    -- enabled = true,
     opts = {
+        completion = {
+            list = {
+                selection = {
+                    preselect = true,
+                    auto_insert = false,
+                },
+            },
+        },
         keymap = {
             preset = "default",
-            ["<C-y>"] = { "select_and_accept" },
-            ["<Tab>"] = { "select_and_accept" },
+            ["<C-y>"] = { "select_and_accept", "fallback" },
+            ["<C-m>"] = { "select_and_accept", "fallback" },
+            ["<Tab>"] = { "select_and_accept", "fallback" },
+            ["<CR>"] = { "fallback" },
+
+            ["<PageUp>"] = { "scroll_documentation_up", "fallback" },
+            ["<PageDown>"] = { "scroll_documentation_down", "fallback" },
+        },
+        -- experimental, signature help
+        signature = {
+            enabled = false,
+            window = { show_documentation = false },
         },
     },
 }
