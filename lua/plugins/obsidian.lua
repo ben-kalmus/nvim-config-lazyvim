@@ -73,17 +73,22 @@ return {
             -- Create note IDs in a Zettelkasten format with a timestamp and a suffix.
             -- In this case a note with the title 'My new note' will be given an ID that looks
             -- like '1657296016-my-new-note', and therefore the file name '1657296016-my-new-note.md'
-            local suffix = ""
+            local filename = ""
             if title ~= nil then
                 -- If title is given, transform it into valid file name.
-                suffix = title:gsub(" ", "-"):gsub("[^A-Za-z0-9-]", ""):lower()
+                filename = title:gsub(" ", "-"):gsub("[^A-Za-z0-9-]", ""):lower()
+                -- check if file already exists in current directory
+                if vim.fn.filereadable(vim.fn.expand("%:p:h") .. "/" .. filename .. ".md") == 1 then
+                    -- If the file already exists, rename
+                    filename = tostring(os.time()) .. "-" .. filename
+                end
             else
                 -- If title is nil, just add 4 random uppercase letters to the suffix.
                 for _ = 1, 4 do
-                    suffix = suffix .. string.char(math.random(65, 90))
+                    filename = tostring(os.time()) .. "-" .. string.char(math.random(65, 90))
                 end
             end
-            return tostring(os.time()) .. "-" .. suffix
+            return filename
         end,
 
         -- Optional, alternatively you can customize the frontmatter data.
