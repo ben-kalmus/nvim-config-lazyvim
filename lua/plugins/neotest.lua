@@ -8,12 +8,22 @@ return {
         -- The adapter will then be automatically loaded with the config.
         adapters = {},
         -- Example for loading neotest-golang with a custom config
-        -- adapters = {
-        --     ["neotest-golang"] = {
-        --         go_test_args = { "-v", "-race", "-count=1", "-timeout=60s" },
-        --         dap_go_enabled = true,
-        --     },
-        -- },
+        adapters = {
+            ["neotest-golang"] = {
+                go_test_args = {
+                    "-v",
+                    "-race",
+                    "-count=1",
+                    "-timeout=200s",
+                    "-args",
+                    "-provider=aws",
+                    "-instance=local",
+                    "-n=minimetis",
+                    "-domain=localhost",
+                },
+                dap_go_enabled = true,
+            },
+        },
         status = { virtual_text = false },
         output = { open_on_run = true },
         quickfix = {
