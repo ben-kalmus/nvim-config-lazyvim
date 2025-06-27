@@ -6,6 +6,9 @@ local map = vim.keymap
 
 -- remove default mapping which opens Help. can still access with :help
 map.set({ "v", "n", "i", "c" }, "<F1>", "<Nop>")
+map.set({ "n", "v" }, "<F1>", function()
+    require("dap").step_into()
+end, { desc = "Step Into F1" })
 
 -- rebind deletions to black hole register _
 map.set({ "n", "v" }, "x", '"_x', { noremap = true })
