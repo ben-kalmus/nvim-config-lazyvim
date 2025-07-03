@@ -86,3 +86,29 @@ map.set(
 -- Add custom command to reload key mapping file
 vim.api.nvim_create_user_command("ReloadKeymaps", "luafile ~/.config/nvim/lua/config/keymaps.lua", {})
 vim.api.nvim_create_user_command("ReloadOptions", "luafile ~/.config/nvim/lua/config/options.lua", {})
+
+local function smart_cancel()
+    local mode = vim.fn.mode()
+
+    -- If we are in operator-pending mode (e.g., after pressing 'c', 'd', or 'y'),
+    -- we must send <Esc> to cancel the operation fully.
+    if mode == "o" or mode == "ov" then
+        return "<Esc>"
+    end
+
+    -- In insert, command, or select mode, <C-c> is the more appropriate cancel.
+    if mode == "i" or mode == "ic" or mode == "s" or mode == "c" then
+        return "<C-c>"
+    end
+
+    -- In any other mode (normal, visual), just send <Esc>.
+    return "<Esc>"
+end
+
+-- Now, we remap <C-c> in the most important modes to use our smart function.
+-- { 'n', 'v', 'o', 'i' } covers normal, visual, operator-pending, and insert.
+vim.keymap.set({ "n", "v", "o", "i" }, "<C-c>", smart_cancel, {
+    expr = true, -- This is crucial: it executes the function to get the keys to press.
+    silent = true,
+    desc = "Smart Cancel (clears which-key)",
+})
