@@ -35,7 +35,7 @@ return {
 
         { "<F2>", function() require("dap").step_over() end, desc = "Step Over F2" },
         { "<F3>", function() require("dap").step_out() end, desc = "Step Out F3" },
-        -- { "<F4>", function() require("dap").pause() end, desc = "Pause" },
+        { "<F4>", function() require("dap").run_to_cursor() end, desc = "Run to Cursor F4" },
         { "<F5>", function() require("dap").continue() end, desc = "Run/Continue F5" },
         { "<F6>", function() require("dap").pause() end, desc = "Pause F6" },
 
