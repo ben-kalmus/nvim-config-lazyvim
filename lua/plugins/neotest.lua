@@ -1,3 +1,35 @@
+-- Function to get neotest arguments based on the current directory
+local function get_neotest_args()
+    local cwd = vim.fn.getcwd()
+
+    -- Define directory-specific test arguments
+    local dir_args = {
+        -- Example patterns and their corresponding args
+        ["tests/e2e/compositions/"] = {
+            -- "-args",
+            -- "-provider=aws",
+            -- "-instance=local",
+            -- "-n=minimetis",
+            -- "-domain=localhost",
+        },
+    }
+
+    -- Check for exact directory matches
+    if dir_args[cwd] then
+        return dir_args[cwd]
+    end
+
+    -- Check for partial directory matches
+    for dir, args in pairs(dir_args) do
+        if cwd:match(dir) then
+            return args
+        end
+    end
+
+    -- Default arguments if no match is found
+    return {}
+end
+
 return {
     "nvim-neotest/neotest",
     dependencies = { "nvim-neotest/nvim-nio" },
