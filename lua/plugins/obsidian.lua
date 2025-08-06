@@ -1,6 +1,6 @@
 return {
     "epwalsh/obsidian.nvim",
-    enabled = false, -- !!!DISABLED!!!
+    enabled = true,
 
     version = "*", -- recommended, use latest release instead of latest commit
     lazy = true,
@@ -13,11 +13,10 @@ return {
     --     "BufReadPre " .. vim.fn.expand "~" .. "/notes-vault/personal/*.md",
     --     "BufNewFile " .. vim.fn.expand "~" .. "/notes-vault/personal/*.md",
     -- },
-    dependencies = {
-        "nvim-lua/plenary.nvim",
-        "hrsh7th/nvim-cmp",
-        "nvim-telescope/telescope.nvim",
-    },
+    -- dependencies = {
+    --     "nvim-lua/plenary.nvim",
+    --     "nvim-telescope/telescope.nvim",
+    -- },
     opts = {
         ui = {
             enable = false,
