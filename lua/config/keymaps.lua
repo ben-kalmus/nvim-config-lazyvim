@@ -35,6 +35,9 @@ map.set({ "n", "v" }, "zh", "zH", { noremap = true })
 -- outdent line to the left
 vim.keymap.set("i", "<S-Tab>", "<C-d>", { desc = "Outdent line" })
 
+-- Split a line at cursor position: opposite of normal mode (capital) `J`
+vim.keymap.set({ "n", "v" }, "<C-J>", "i<CR><Esc>", { noremap = true, desc = "Split line at cursor" })
+
 -- Git
 map.set({ "n", "v" }, "<leader>gn", function()
     require("fzf-lua").git_blame()
