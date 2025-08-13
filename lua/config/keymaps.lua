@@ -35,8 +35,8 @@ map.set({ "n", "v" }, "zh", "zH", { noremap = true })
 -- outdent line to the left
 vim.keymap.set("i", "<S-Tab>", "<C-d>", { desc = "Outdent line" })
 
--- Split a line at cursor position: opposite of normal mode (capital) `J`
-vim.keymap.set({ "n", "v" }, "<C-J>", "i<CR><Esc>", { noremap = true, desc = "Split line at cursor" })
+-- Split a line at cursor position. Opposite of J in normal mode which join line below to current line.
+-- vim.keymap.set({ "n", "v" }, "<C-;>", "i<CR><Esc>", { noremap = true, desc = "Split line at cursor" })
 
 -- Git
 map.set({ "n", "v" }, "<leader>gn", function()
@@ -48,6 +48,13 @@ end, { noremap = true, silent = true, desc = "Git FZF status" })
 map.set({ "n", "v" }, "<leader>gC", function()
     require("fzf-lua").git_status()
 end, { noremap = true, silent = true, desc = "Git buffer commit log" })
+-- Shows diff of the current line.
+map.set(
+    { "n", "v" },
+    "<leader>gp",
+    [[:Gitsigns preview_hunk_inline<CR>]],
+    { noremap = true, silent = true, desc = "Git preview hunk diff" }
+)
 
 -- DiffView
 map.set(
