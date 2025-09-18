@@ -4,6 +4,13 @@
 
 local map = vim.keymap
 
+vim.keymap.set("n", "<leader>c]", function()
+    require("nvim-treesitter-textobjects.swap").swap_next("@parameter.inner")
+end)
+vim.keymap.set("n", "<leader>c[", function()
+    require("nvim-treesitter-textobjects.swap").swap_next("@parameter.outer")
+end)
+
 -- remove default mapping which opens Help. can still access with :help
 map.set({ "v", "n", "i", "c" }, "<F1>", "<Nop>")
 map.set({ "n", "v" }, "<F1>", function()
