@@ -63,6 +63,31 @@ map.set(
     { noremap = true, silent = true, desc = "Git preview hunk diff" }
 )
 
+-- Git Worktrees (lua plugin)
+map.set({ "n", "v" }, "<leader>gwc", function()
+    vim.ui.input({ prompt = "Enter worktree name: " }, function(input)
+        if input and input ~= "" then
+            require("git-worktree").create_worktree(input)
+        end
+    end)
+end, { noremap = true, silent = true, desc = "Create git worktree" })
+
+map.set({ "n", "v" }, "<leader>gws", function()
+    vim.ui.input({ prompt = "Switch to worktree: " }, function(input)
+        if input and input ~= "" then
+            require("git-worktree").switch_worktree(input)
+        end
+    end)
+end, { noremap = true, silent = true, desc = "Switch to worktree" })
+
+map.set({ "n", "v" }, "<leader>gwd", function()
+    vim.ui.input({ prompt = "Delete worktree: " }, function(input)
+        if input and input ~= "" then
+            require("git-worktree").delete_worktree(input)
+        end
+    end)
+end, { noremap = true, silent = true, desc = "Delete git worktree" })
+
 -- DiffView
 map.set(
     { "n", "v" },
