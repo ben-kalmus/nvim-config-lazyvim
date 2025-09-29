@@ -6,10 +6,10 @@ local map = vim.keymap
 
 vim.keymap.set("n", "<leader>c]", function()
     require("nvim-treesitter-textobjects.swap").swap_next("@parameter.inner")
-end)
+end, { desc = "Swap with previous parameter" })
 vim.keymap.set("n", "<leader>c[", function()
     require("nvim-treesitter-textobjects.swap").swap_next("@parameter.outer")
-end)
+end, { desc = "Swap with next parameter" })
 
 -- remove default mapping which opens Help. can still access with :help
 map.set({ "v", "n", "i", "c" }, "<F1>", "<Nop>")
@@ -124,6 +124,10 @@ map.set(
     "<cmd>lua require('persistent-breakpoints.api').set_log_point()<cr>",
     { noremap = true, silent = true, desc = "Set Log Point" }
 )
+
+-- bufferline tab switching
+map.set({ "n", "v" }, "<leader>wn", [[:tabnew<CR>]], { noremap = true, silent = true, desc = "Create new tab" })
+map.set({ "n", "v" }, "<leader>wc", [[:tabclose<CR>]], { noremap = true, silent = true, desc = "Close current tab" })
 
 -- Add custom command to reload key mapping file
 vim.api.nvim_create_user_command("ReloadKeymaps", "luafile ~/.config/nvim/lua/config/keymaps.lua", {})
