@@ -32,7 +32,12 @@ end
 
 return {
     "nvim-neotest/neotest",
-    dependencies = { "nvim-neotest/nvim-nio" },
+    dependencies = {
+        "nvim-neotest/nvim-nio",
+        {
+            "fredrikaverpil/neotest-golang",
+        },
+    },
     opts = {
         -- Can be a list of adapters like what neotest expects,
         -- or a list of adapter names,
@@ -42,6 +47,8 @@ return {
         -- Example for loading neotest-golang with a custom config
         adapters = {
             ["neotest-golang"] = {
+
+                warn_test_name_dupes = false,
                 go_test_args = {
                     "-v",
                     "-race",
@@ -59,6 +66,10 @@ return {
         },
         status = { virtual_text = false },
         output = { open_on_run = true },
+        output_panel = {
+            enabled = true,
+            open = "botright vsplit | vertical resize 80",
+        },
         quickfix = {
             -- Overwriting lazyvim defaults:
             -- Disable automatically opening the quickfix tab when a test fails
