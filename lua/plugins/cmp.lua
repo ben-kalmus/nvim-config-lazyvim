@@ -31,5 +31,47 @@ return {
             --     return LazyVim.cmp.map({ "snippet_forward", "ai_accept" }, fallback)()
             -- end,
         }),
+        sources = cmp.config.sources({
+            { name = "lazydev", group_index = 0 },
+            { name = "nvim_lsp" },
+            { name = "path" },
+            { name = "copilot" },
+            { name = "buffer" },
+            { name = "luasnip" },
+        }),
+        formatting = {
+            format = function(entry, vim_item)
+                -- Add source name to the completion item
+                vim_item.menu = ({
+                    nvim_lsp = "[LSP]",
+                    path = "[Path]",
+                    copilot = "[AI]",
+                    buffer = "[Buf]",
+                    luasnip = "[Snip]",
+                    lazydev = "[Dev]",
+                    -- nvim_lsp = "[LSP]",
+                    -- copilot = "[Copilot]",
+                    -- luasnip = "[Snippet]",
+                    -- buffer = "[Buffer]",
+                    -- path = "[Path]",
+                })[entry.source.name]
+                return vim_item
+            end,
+        },
+        sorting = {
+            priority_weight = 2,
+            comparators = {
+                require("copilot_cmp.comparators").prioritize,
+                cmp.config.compare.offset,
+                cmp.config.compare.exact,
+                cmp.config.compare.score,
+                cmp.config.compare.recently_used,
+                cmp.config.compare.locality,
+                cmp.config.compare.kind,
+                cmp.config.compare.sort_text,
+                cmp.config.compare.length,
+                cmp.config.compare.order,
+            },
+        },
     },
 }
