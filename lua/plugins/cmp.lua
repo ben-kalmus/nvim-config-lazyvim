@@ -49,11 +49,6 @@ return {
                     buffer = "[Buf]",
                     luasnip = "[Snip]",
                     lazydev = "[Dev]",
-                    -- nvim_lsp = "[LSP]",
-                    -- copilot = "[Copilot]",
-                    -- luasnip = "[Snippet]",
-                    -- buffer = "[Buffer]",
-                    -- path = "[Path]",
                 })[entry.source.name]
                 return vim_item
             end,
@@ -61,7 +56,7 @@ return {
         sorting = {
             priority_weight = 2,
             comparators = {
-                require("copilot_cmp.comparators").prioritize,
+                -- require("copilot_cmp.comparators").prioritize,
                 cmp.config.compare.offset,
                 cmp.config.compare.exact,
                 cmp.config.compare.score,
