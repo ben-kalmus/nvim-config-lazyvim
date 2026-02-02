@@ -55,4 +55,43 @@ require("mason-lspconfig").setup({
   },
 })
 
+-- Setup LSP keybindings with Telescope integration (LazyVim-style)
+vim.api.nvim_create_autocmd("LspAttach", {
+  group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
+  callback = function(args)
+    local bufnr = args.buf
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+
+    -- Helper function for buffer-local keymaps
+    local function map(mode, lhs, rhs, desc)
+      vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = "LSP: " .. desc })
+    end
+
+    -- LSP Navigation keybindings using Telescope
+    map("n", "gd", "<cmd>Telescope lsp_definitions<cr>", "Goto Definition")
+    map("n", "gr", "<cmd>Telescope lsp_references<cr>", "Goto References")
+    map("n", "gI", "<cmd>Telescope lsp_implementations<cr>", "Goto Implementation")
+    map("n", "gt", "<cmd>Telescope lsp_type_definitions<cr>", "Goto Type Definition")
+    map("n", "gD", vim.lsp.buf.declaration, "Goto Declaration")
+
+    -- Symbols
+    map("n", "<leader>ss", "<cmd>Telescope lsp_document_symbols<cr>", "Document Symbols")
+    map("n", "<leader>sS", "<cmd>Telescope lsp_workspace_symbols<cr>", "Workspace Symbols")
+
+    -- Code actions
+    map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, "Code Action")
+    map("n", "<leader>cr", vim.lsp.buf.rename, "Rename")
+
+    -- Documentation
+    map("n", "K", vim.lsp.buf.hover, "Hover Documentation")
+    map("n", "gK", vim.lsp.buf.signature_help, "Signature Help")
+    -- map("i", "<C-k>", vim.lsp.buf.signature_help, "Signature Help")
+
+    -- Diagnostics
+    map("n", "<leader>cd", vim.diagnostic.open_float, "Line Diagnostics")
+    map("n", "]d", vim.diagnostic.goto_next, "Next Diagnostic")
+    map("n", "[d", vim.diagnostic.goto_prev, "Prev Diagnostic")
+  end,
+})
+
 -- read :h vim.lsp.config for changing options of lsp servers 
