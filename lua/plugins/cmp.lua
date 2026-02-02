@@ -14,8 +14,9 @@ return {
             ["<C-p>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
             -- C-Space is already a tmux keybind
             -- ["<C-Space>"] = cmp.mapping.complete(),
-            ["<tab>"] = LazyVim.cmp.confirm({ select = true }),
-            ["<C-y>"] = LazyVim.cmp.confirm({ select = true }),
+            -- ["<tab>"] = cmp.mapping.confirm({ select = true }),
+            ["<C-y>"] = cmp.mapping.confirm({ select = true }),
+            ["<Space>"] = cmp.mapping.confirm({ select = true }),
             -- Allow <Enter Key> to fallthrough
             ["<CR>"] = function(fallback)
                 cmp.abort()

@@ -7,7 +7,21 @@ return {
 
   -- These are some examples, uncomment them if you want to see them work!
   {
+    "williamboman/mason.nvim",
+    opts = {},
+  },
+
+  {
+    "williamboman/mason-lspconfig.nvim",
+    dependencies = { "mason.nvim" },
+    opts = {
+      automatic_installation = true,
+    },
+  },
+
+  {
     "neovim/nvim-lspconfig",
+    dependencies = { "mason-lspconfig.nvim" },
     config = function()
       require "configs.lspconfig"
     end,
