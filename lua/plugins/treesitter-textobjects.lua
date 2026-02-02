@@ -87,6 +87,83 @@ return {
       ["a/"] = "@comment.outer",
     }
 
+    -- Peek definition in floating window
+    local function peek_definition()
+      local params = vim.lsp.util.make_position_params()
+      return vim.lsp.buf_request(0, "textDocument/definition", params, function(_, result)
+        if not result or vim.tbl_isempty(result) then
+          vim.notify("No definition found", vim.log.levels.INFO)
+          return
+        end
+        -- Handle both Location and LocationLink
+        local location = result[1]
+        local uri = location.uri or location.targetUri
+        local range = location.range or location.targetSelectionRange
+
+        -- Open in floating window
+        vim.lsp.util.preview_location(location, { border = "rounded", max_height = 20 })
+      end)
+    end
+
+    -- Jump to next/previous LSP symbol (function, class, etc.)
+    local function goto_lsp_symbol(direction, symbol_kind)
+      local params = { textDocument = vim.lsp.util.make_text_document_params() }
+      vim.lsp.buf_request(0, "textDocument/documentSymbol", params, function(_, result)
+        if not result or vim.tbl_isempty(result) then
+          return
+        end
+
+        local symbols = {}
+        local function flatten(items, parent_range)
+          for _, item in ipairs(items) do
+            if not symbol_kind or item.kind == symbol_kind then
+              table.insert(symbols, {
+                name = item.name,
+                kind = item.kind,
+                range = item.range or item.location.range,
+              })
+            end
+            if item.children then
+              flatten(item.children, item.range)
+            end
+          end
+        end
+        flatten(result)
+
+        -- Sort by position
+        table.sort(symbols, function(a, b)
+          return a.range.start.line < b.range.start.line
+        end)
+
+        -- Find current position
+        local cursor = vim.api.nvim_win_get_cursor(0)
+        local current_line = cursor[1] - 1
+
+        -- Find next/previous symbol
+        local target
+        if direction == "next" then
+          for _, sym in ipairs(symbols) do
+            if sym.range.start.line > current_line then
+              target = sym
+              break
+            end
+          end
+        else
+          for i = #symbols, 1, -1 do
+            if symbols[i].range.start.line < current_line then
+              target = symbols[i]
+              break
+            end
+          end
+        end
+
+        if target then
+          vim.api.nvim_win_set_cursor(0, { target.range.start.line + 1, target.range.start.character })
+          vim.cmd("normal! zz")
+        end
+      end)
+    end
+
     -- Function to attach keymaps to buffer
     local function attach(buf)
       -- Create movement keymaps
@@ -115,6 +192,22 @@ return {
       vim.keymap.set("n", "<leader>A", function()
         require("nvim-treesitter-textobjects.swap").swap_previous("@parameter.inner")
       end, { buffer = buf, desc = "Swap previous parameter", silent = true })
+
+      -- Peek definition
+      vim.keymap.set("n", "gp", peek_definition, { buffer = buf, desc = "Peek definition", silent = true })
+
+      -- LSP symbol navigation (alternative to treesitter)
+      vim.keymap.set("n", "]F", function()
+        goto_lsp_symbol("next")
+      end, { buffer = buf, desc = "Next LSP symbol", silent = true })
+
+      vim.keymap.set("n", "[F", function()
+        goto_lsp_symbol("prev")
+      end, { buffer = buf, desc = "Previous LSP symbol", silent = true })
+
+      -- Select entire buffer
+      vim.keymap.set({ "x", "o" }, "ig", ":<C-u>normal! ggVG<CR>", { buffer = buf, desc = "Select entire buffer", silent = true })
+      vim.keymap.set({ "x", "o" }, "ag", ":<C-u>normal! ggVG<CR>", { buffer = buf, desc = "Select entire buffer", silent = true })
     end
 
     -- Attach to all FileType events
