@@ -16,12 +16,12 @@ return {
             -- ["<C-Space>"] = cmp.mapping.complete(),
             -- ["<tab>"] = cmp.mapping.confirm({ select = true }),
             ["<C-y>"] = cmp.mapping.confirm({ select = true }),
-            ["<Space>"] = cmp.mapping.confirm({ select = true }),
+            ["<CR>"] = cmp.mapping.confirm({ select = true }),
             -- Allow <Enter Key> to fallthrough
-            ["<CR>"] = function(fallback)
-                cmp.abort()
-                fallback()
-            end,
+            -- ["<CR>"] = function(fallback)
+            --     cmp.abort()
+            --     fallback()
+            -- end,
 
             -- ["<C-CR>"] = LazyVim.cmp.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
             -- ["<C-CR>"] = function(fallback)
