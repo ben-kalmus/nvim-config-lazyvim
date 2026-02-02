@@ -23,32 +23,68 @@ return {
         ["]f"] = "@function.outer",
         ["]c"] = "@class.outer",
         ["]a"] = "@parameter.inner",
+        ["]o"] = "@loop.outer",           -- loops (for/while)
+        ["]s"] = "@conditional.outer",    -- if/switch statements
+        ["]m"] = "@call.outer",           -- method/function calls
+        ["]z"] = "@fold",                 -- folds
       },
       goto_next_end = {
         ["]F"] = "@function.outer",
         ["]C"] = "@class.outer",
         ["]A"] = "@parameter.inner",
+        ["]O"] = "@loop.outer",
+        ["]S"] = "@conditional.outer",
+        ["]M"] = "@call.outer",
       },
       goto_previous_start = {
         ["[f"] = "@function.outer",
         ["[c"] = "@class.outer",
         ["[a"] = "@parameter.inner",
+        ["[o"] = "@loop.outer",
+        ["[s"] = "@conditional.outer",
+        ["[m"] = "@call.outer",
+        ["[z"] = "@fold",
       },
       goto_previous_end = {
         ["[F"] = "@function.outer",
         ["[C"] = "@class.outer",
         ["[A"] = "@parameter.inner",
+        ["[O"] = "@loop.outer",
+        ["[S"] = "@conditional.outer",
+        ["[M"] = "@call.outer",
       },
     }
 
     -- Define select keymaps
     local selects = {
+      -- Functions and classes
       ["af"] = "@function.outer",
       ["if"] = "@function.inner",
       ["ac"] = "@class.outer",
       ["ic"] = "@class.inner",
+
+      -- Parameters and arguments
       ["aa"] = "@parameter.outer",
       ["ia"] = "@parameter.inner",
+
+      -- Conditionals (if/switch)
+      ["ai"] = "@conditional.outer",
+      ["ii"] = "@conditional.inner",
+
+      -- Loops (for/while)
+      ["al"] = "@loop.outer",
+      ["il"] = "@loop.inner",
+
+      -- Blocks
+      ["ab"] = "@block.outer",
+      ["ib"] = "@block.inner",
+
+      -- Calls (function/method calls)
+      ["am"] = "@call.outer",
+      ["im"] = "@call.inner",
+
+      -- Comments
+      ["a/"] = "@comment.outer",
     }
 
     -- Function to attach keymaps to buffer
