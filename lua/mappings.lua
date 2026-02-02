@@ -1,5 +1,8 @@
 require "nvchad.mappings"
 
+-- Disable NvChad's default <leader>x (close buffer) - we use Trouble with <leader>x now
+vim.keymap.del("n", "<leader>x")
+
 -- add yours here
 -- local map = vim.keymap.set
 local map = vim.keymap
@@ -166,3 +169,14 @@ vim.keymap.set({ "n", "v", "o", "i" }, "<C-c>", smart_cancel, {
     silent = true,
     desc = "Smart Cancel (clears which-key)",
 })
+
+-- Buffer management (LazyVim style)
+map.set("n", "<leader>bd", "<cmd>bd<cr>", { desc = "Delete Buffer" })
+map.set("n", "<leader>bD", "<cmd>bd!<cr>", { desc = "Delete Buffer (force)" })
+map.set("n", "<leader>bo", "<cmd>%bd|e#|bd#<cr>", { desc = "Delete Other Buffers" })
+map.set("n", "<leader>bp", "<cmd>bprevious<cr>", { desc = "Previous Buffer" })
+map.set("n", "<leader>bn", "<cmd>bnext<cr>", { desc = "Next Buffer" })
+map.set("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
+map.set("n", "<leader>`", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
+map.set("n", "[b", "<cmd>bprevious<cr>", { desc = "Previous Buffer" })
+map.set("n", "]b", "<cmd>bnext<cr>", { desc = "Next Buffer" })
