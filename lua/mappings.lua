@@ -1,5 +1,20 @@
 require "nvchad.mappings"
 
+  -- NvChad terminal toggles:
+  -- - Alt+h - Toggle horizontal terminal
+  -- - Alt+v - Toggle vertical terminal
+  -- - Alt+i - Toggle floating terminal
+
+  -- In terminal mode:
+  -- - Alt+h/v/i - Toggle back to normal mode
+  -- - <C-x> - Exit terminal mode (alternative to <C-\><C-n>)
+
+  -- These are defined in NvChad's default mappings. Want me to add some additional convenient terminal keybindings, like:
+  -- - <leader>th - Horizontal terminal
+  -- - <leader>tv - Vertical terminal
+  -- - <leader>tf - Floating terminal
+  -- - <C-/> - Toggle terminal (like VSCode)
+
 -- Disable NvChad's default <leader>x (close buffer) - we use Trouble with <leader>x now
 vim.keymap.del("n", "<leader>x")
 
