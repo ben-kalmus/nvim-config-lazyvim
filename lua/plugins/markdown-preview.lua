@@ -14,6 +14,10 @@ return {
         },
     },
     config = function()
-        vim.cmd([[do FileType]])
+        vim.g.mkdp_auto_close = 0
+        -- vim.g.mkdp_port = '8080'
+        vim.g.mkdp_theme = 'dark'
+
+        -- vim.cmd([[do FileType]])
     end,
 }
