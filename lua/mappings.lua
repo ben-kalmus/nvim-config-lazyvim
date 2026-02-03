@@ -233,8 +233,27 @@ map.set({ "n", "v", "o", "i" }, "<C-c>", smart_cancel, {
 })
 
 -- Buffer management (LazyVim style)
-map.set("n", "<leader>bd", "<cmd>bp|bd #<cr>", { desc = "Delete Buffer" })
--- map.set("n", "<leader>bD", "<cmd>bp|bd! #<cr>", { desc = "Delete Buffer (force)" })
+local function delete_buffer(force)
+  local buf = vim.api.nvim_get_current_buf()
+  local listed_buffers = vim.tbl_filter(function(b)
+    return vim.bo[b].buflisted and b ~= buf
+  end, vim.api.nvim_list_bufs())
+
+  -- If there are other buffers, switch to one of them
+  if #listed_buffers > 0 then
+    vim.cmd("bprevious")
+  else
+    -- If this is the only buffer, create a new empty one first
+    vim.cmd("enew")
+  end
+
+  -- Delete the original buffer
+  local delete_cmd = force and "bdelete!" or "bdelete"
+  vim.cmd(delete_cmd .. " " .. buf)
+end
+
+map.set("n", "<leader>bd", function() delete_buffer(false) end, { desc = "Delete Buffer" })
+map.set("n", "<leader>bD", function() delete_buffer(true) end, { desc = "Delete Buffer (force)" })
 map.set("n", "<leader>bo", "<cmd>%bd|e#|bd#<cr>", { desc = "Delete Other Buffers" })
 map.set("n", "<leader>bp", "<cmd>bprevious<cr>", { desc = "Previous Buffer" })
 map.set("n", "<leader>bn", "<cmd>bnext<cr>", { desc = "Next Buffer" })
