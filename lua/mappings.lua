@@ -1,6 +1,10 @@
 require "nvchad.mappings"
 -- local map = vim.keymap.set
 local map = vim.keymap
+-- pcall protected call, doesnt error if keymap has already been removed (useful when calling :ReloadKeymaps)
+local del = function (mode, keymap)
+    pcall(vim.keymap.del, mode, keymap)
+end
 
   -- NvChad terminal toggles:
   -- - Alt+h - Toggle horizontal terminal
@@ -18,7 +22,7 @@ local map = vim.keymap
   -- - <C-/> - Toggle terminal (like VSCode)
 
 -- Disable NvChad's default <leader>x (close buffer) - we use Trouble with <leader>x now
-vim.keymap.del("n", "<leader>x")
+del("n", "<leader>x")
 -- NvChad's <leader>h (horizontal terminal) is overridden by Harpoon's quick menu in plugins/harpoon.lua
 -- Terminal toggle with Ctrl+/
 map.set({ "n", "t" }, "<C-/>", function()
@@ -35,10 +39,10 @@ map.set({ "n", "i", "v" }, "<C-s>", "<cmd> w <cr>")
 map.set("n", "<leader>e", "<cmd>NvimTreeToggle<cr>", { desc = "Toggle file explorer" })
 
 
-vim.keymap.set("n", "<leader>c]", function()
+map.set("n", "<leader>c]", function()
     require("nvim-treesitter-textobjects.swap").swap_next("@parameter.inner")
 end, { desc = "Swap with previous parameter" })
-vim.keymap.set("n", "<leader>c[", function()
+map.set("n", "<leader>c[", function()
     require("nvim-treesitter-textobjects.swap").swap_next("@parameter.outer")
 end, { desc = "Swap with next parameter" })
 
@@ -71,7 +75,7 @@ map.set({ "n", "v" }, "zh", "zH", { noremap = true })
 
 -- Insert mode settings
 -- outdent line to the left
-vim.keymap.set("i", "<S-Tab>", "<C-d>", { desc = "Outdent line" })
+map.set("i", "<S-Tab>", "<C-d>", { desc = "Outdent line" })
 
 -- Split a line at cursor position. Opposite of J in normal mode which join line below to current line.
 -- vim.keymap.set({ "n", "v" }, "<C-;>", "i<CR><Esc>", { noremap = true, desc = "Split line at cursor" })
@@ -195,8 +199,8 @@ map.set({ "n", "v" }, "<leader>wn", [[:tabnew<CR>]], { noremap = true, silent = 
 map.set({ "n", "v" }, "<leader>wc", [[:tabclose<CR>]], { noremap = true, silent = true, desc = "Close current tab" })
 
 -- Add custom command to reload key mapping file
-vim.api.nvim_create_user_command("ReloadKeymaps", "luafile ~/.config/nvim/lua/config/keymaps.lua", {})
-vim.api.nvim_create_user_command("ReloadOptions", "luafile ~/.config/nvim/lua/config/options.lua", {})
+vim.api.nvim_create_user_command("ReloadKeymaps", "luafile ~/.config/nvim/lua/mappings.lua", {})
+vim.api.nvim_create_user_command("ReloadOptions", "luafile ~/.config/nvim/lua/options.lua", {})
 
 local function smart_cancel()
     local mode = vim.fn.mode()
@@ -218,7 +222,7 @@ end
 
 -- Now, we remap <C-c> in the most important modes to use our smart function.
 -- { 'n', 'v', 'o', 'i' } covers normal, visual, operator-pending, and insert.
-vim.keymap.set({ "n", "v", "o", "i" }, "<C-c>", smart_cancel, {
+map.set({ "n", "v", "o", "i" }, "<C-c>", smart_cancel, {
     expr = true, -- This is crucial: it executes the function to get the keys to press.
     silent = true,
     desc = "Smart Cancel (clears which-key)",
@@ -231,6 +235,5 @@ map.set("n", "<leader>bo", "<cmd>%bd|e#|bd#<cr>", { desc = "Delete Other Buffers
 map.set("n", "<leader>bp", "<cmd>bprevious<cr>", { desc = "Previous Buffer" })
 map.set("n", "<leader>bn", "<cmd>bnext<cr>", { desc = "Next Buffer" })
 map.set("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
-map.set("n", "<leader>`", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
-map.set("n", "[b", "<cmd>bprevious<cr>", { desc = "Previous Buffer" })
-map.set("n", "]b", "<cmd>bnext<cr>", { desc = "Next Buffer" })
+map.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Previous Buffer" })
+map.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer" })
