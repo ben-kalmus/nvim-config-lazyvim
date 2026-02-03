@@ -31,6 +31,11 @@ map.set({ "n", "i", "v" }, "<C-s>", "<cmd> w <cr>")
 -- Override NvChad's <leader>e to toggle instead of just focus
 map.set("n", "<leader>e", "<cmd>NvimTreeToggle<cr>", { desc = "Toggle file explorer" })
 
+-- Terminal toggle with Ctrl+/ (like VSCode)
+map.set({ "n", "t" }, "<C-/>", function()
+  require("nvchad.term").toggle({ pos = "sp", id = "htoggleTerm" })
+end, { desc = "Toggle horizontal terminal" })
+
 vim.keymap.set("n", "<leader>c]", function()
     require("nvim-treesitter-textobjects.swap").swap_next("@parameter.inner")
 end, { desc = "Swap with previous parameter" })
