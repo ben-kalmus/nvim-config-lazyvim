@@ -2,26 +2,7 @@ return {
     "mfussenegger/nvim-dap",
     dependencies = {
         -- Go debugger adapter
-        {
-            "leoluz/nvim-dap-go",
-            opts = {
-                -- delve configurations
-                delve = {
-                    path = "dlv",
-                    initialize_timeout_sec = 20,
-                    port = "${port}",
-                },
-                -- dap configurations
-                dap_configurations = {
-                    {
-                        type = "go",
-                        name = "Attach remote",
-                        mode = "remote",
-                        request = "attach",
-                    },
-                },
-            },
-        },
+        "leoluz/nvim-dap-go",
         -- Debug UI
         {
             "rcarriga/nvim-dap-ui",
@@ -58,6 +39,24 @@ return {
             },
         },
     },
+    config = function(_, opts)
+        -- Setup dap-go after nvim-dap is loaded
+        require("dap-go").setup({
+            delve = {
+                path = "dlv",
+                initialize_timeout_sec = 20,
+                port = "${port}",
+            },
+            dap_configurations = {
+                {
+                    type = "go",
+                    name = "Attach remote",
+                    mode = "remote",
+                    request = "attach",
+                },
+            },
+        })
+    end,
     -- stylua: ignore
     keys = {
         { "<leader>d", "", desc = "+debug", mode = {"n", "v"} },
