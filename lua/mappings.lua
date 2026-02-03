@@ -19,8 +19,7 @@ local map = vim.keymap
 
 -- Disable NvChad's default <leader>x (close buffer) - we use Trouble with <leader>x now
 vim.keymap.del("n", "<leader>x")
--- remove h for terminal, instead use mapping below
-vim.keymap.del("n", "<leader>h")
+-- NvChad's <leader>h (horizontal terminal) is overridden by Harpoon's quick menu in plugins/harpoon.lua
 -- Terminal toggle with Ctrl+/
 map.set({ "n", "t" }, "<C-/>", function()
   require("nvchad.term").toggle({ pos = "sp", id = "htoggleTerm" })
