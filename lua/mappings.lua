@@ -29,6 +29,10 @@ map.set({ "n", "t" }, "<C-/>", function()
   require("nvchad.term").toggle({ pos = "sp", id = "htoggleTerm" })
 end, { desc = "Toggle horizontal terminal" })
 
+map.set({ "n", "t" }, "<C-\\>", function()
+  require("nvchad.term").toggle({ pos = "vsp", id = "vtoggleTerm", size=0.4})
+end, { desc = "Toggle vertical terminal" })
+
 
 map.set("n", ";", ":", { desc = "CMD enter command mode" })
 map.set("i", "jk", "<ESC>")
