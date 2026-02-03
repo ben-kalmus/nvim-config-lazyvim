@@ -7,9 +7,12 @@ require "nvchad.options"
 
 local opt = vim.opt
 opt.relativenumber = true
--- opt.shiftwidth = 4 -- Size of an indent
 
--- opt.tabstop = 4 -- Number of spaces tabs count for
+-- Tab settings (4 spaces)
+opt.tabstop = 4        -- Number of spaces a tab counts for
+opt.shiftwidth = 4     -- Size of an indent
+opt.softtabstop = 4    -- Number of spaces tab key inserts
+opt.expandtab = true   -- Use spaces instead of tabs
 -- opt.timeoutlen = 50 -- vim.g.vscode and 1000 or 300 --  Lower than default (1000) to quickly trigger which-key
 -- opt.smartindent = true
 --
