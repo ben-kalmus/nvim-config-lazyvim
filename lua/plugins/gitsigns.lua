@@ -2,6 +2,7 @@ return {
     "lewis6991/gitsigns.nvim",
     opts = {
         -- max_file_length = 40000, -- Disable if file is longer than this (in lines)
+        _threaded_diff = false, -- Fix for "Not in async context" error
         signs_staged_enable = true,
         signcolumn = true, -- Toggle with `:Gitsigns toggle_signs`
         watch_gitdir = {
