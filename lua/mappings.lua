@@ -72,7 +72,41 @@ vim.keymap.set("i", "<S-Tab>", "<C-d>", { desc = "Outdent line" })
 -- Split a line at cursor position. Opposite of J in normal mode which join line below to current line.
 -- vim.keymap.set({ "n", "v" }, "<C-;>", "i<CR><Esc>", { noremap = true, desc = "Split line at cursor" })
 
--- Git
+-- Git Hunk Navigation (Gitsigns)
+map.set("n", "]h", function()
+    if vim.wo.diff then
+        vim.cmd.normal({ "]c", bang = true })
+    else
+        require("gitsigns").nav_hunk("next")
+    end
+end, { desc = "Next Git Hunk" })
+
+map.set("n", "[h", function()
+    if vim.wo.diff then
+        vim.cmd.normal({ "[c", bang = true })
+    else
+        require("gitsigns").nav_hunk("prev")
+    end
+end, { desc = "Previous Git Hunk" })
+
+map.set("n", "]H", function()
+    require("gitsigns").nav_hunk("last")
+end, { desc = "Last Git Hunk" })
+
+map.set("n", "[H", function()
+    require("gitsigns").nav_hunk("first")
+end, { desc = "First Git Hunk" })
+
+-- Git Hunk Actions
+map.set({ "n", "v" }, "<leader>ghs", ":Gitsigns stage_hunk<CR>", { desc = "Stage Hunk" })
+map.set({ "n", "v" }, "<leader>ghr", ":Gitsigns reset_hunk<CR>", { desc = "Reset Hunk" })
+map.set("n", "<leader>ghS", "<cmd>Gitsigns stage_buffer<CR>", { desc = "Stage Buffer" })
+map.set("n", "<leader>ghu", "<cmd>Gitsigns undo_stage_hunk<CR>", { desc = "Undo Stage Hunk" })
+map.set("n", "<leader>ghR", "<cmd>Gitsigns reset_buffer<CR>", { desc = "Reset Buffer" })
+map.set("n", "<leader>ghd", "<cmd>Gitsigns diffthis<CR>", { desc = "Diff This" })
+map.set("n", "<leader>ghb", "<cmd>Gitsigns blame_line<CR>", { desc = "Blame Line" })
+
+-- Git (other)
 map.set({ "n", "v" }, "<leader>gn", function()
     require("fzf-lua").git_blame()
 end, { noremap = true, silent = true, desc = "Git FZF Blame buffer" })
