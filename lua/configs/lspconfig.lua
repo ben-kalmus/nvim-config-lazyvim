@@ -67,16 +67,16 @@ vim.api.nvim_create_autocmd("LspAttach", {
       vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = "LSP: " .. desc })
     end
 
-    -- LSP Navigation keybindings using Telescope
-    map("n", "gd", "<cmd>Telescope lsp_definitions<cr>", "Goto Definition")
-    map("n", "gr", "<cmd>Telescope lsp_references<cr>", "Goto References")
-    map("n", "gI", "<cmd>Telescope lsp_implementations<cr>", "Goto Implementation")
-    map("n", "gt", "<cmd>Telescope lsp_type_definitions<cr>", "Goto Type Definition")
+    -- LSP Navigation keybindings using FzfLua
+    map("n", "gd", "<cmd>FzfLua lsp_definitions<cr>", "Goto Definition")
+    map("n", "gr", "<cmd>FzfLua lsp_references<cr>", "Goto References")
+    map("n", "gI", "<cmd>FzfLua lsp_implementations<cr>", "Goto Implementation")
+    map("n", "gy", "<cmd>FzfLua lsp_typedefs<cr>", "Goto Type Definition")
     map("n", "gD", vim.lsp.buf.declaration, "Goto Declaration")
 
     -- Symbols
-    map("n", "<leader>ss", "<cmd>Telescope lsp_document_symbols<cr>", "Document Symbols")
-    map("n", "<leader>sS", "<cmd>Telescope lsp_workspace_symbols<cr>", "Workspace Symbols")
+    map("n", "<leader>ss", "<cmd>FzfLua lsp_document_symbols<cr>", "Document Symbols")
+    map("n", "<leader>sS", "<cmd>FzfLua lsp_workspace_symbols<cr>", "Workspace Symbols")
 
     -- Code actions
     map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, "Code Action")

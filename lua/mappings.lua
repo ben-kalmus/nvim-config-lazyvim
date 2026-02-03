@@ -233,8 +233,8 @@ map.set({ "n", "v", "o", "i" }, "<C-c>", smart_cancel, {
 })
 
 -- Buffer management (LazyVim style)
-map.set("n", "<leader>bd", "<cmd>bd<cr>", { desc = "Delete Buffer" })
-map.set("n", "<leader>bD", "<cmd>bd!<cr>", { desc = "Delete Buffer (force)" })
+map.set("n", "<leader>bd", "<cmd>bp|bd #<cr>", { desc = "Delete Buffer" })
+-- map.set("n", "<leader>bD", "<cmd>bp|bd! #<cr>", { desc = "Delete Buffer (force)" })
 map.set("n", "<leader>bo", "<cmd>%bd|e#|bd#<cr>", { desc = "Delete Other Buffers" })
 map.set("n", "<leader>bp", "<cmd>bprevious<cr>", { desc = "Previous Buffer" })
 map.set("n", "<leader>bn", "<cmd>bnext<cr>", { desc = "Next Buffer" })
