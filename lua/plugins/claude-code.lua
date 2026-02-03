@@ -13,8 +13,8 @@ return {
   },
   opts = {
     window = {
-      split_ratio = 0.35, -- Terminal takes 35% of screen
-      position = "botright", -- Bottom right split
+      split_ratio = 0.4, -- Terminal takes 40% of screen
+      position = "vertical", -- Bottom right split
       enter_insert = true, -- Auto-enter insert mode
 
       -- Alternative: Use floating window (uncomment if preferred)
