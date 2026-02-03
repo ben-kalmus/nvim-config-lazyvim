@@ -1,4 +1,6 @@
 require "nvchad.mappings"
+-- local map = vim.keymap.set
+local map = vim.keymap
 
   -- NvChad terminal toggles:
   -- - Alt+h - Toggle horizontal terminal
@@ -17,10 +19,12 @@ require "nvchad.mappings"
 
 -- Disable NvChad's default <leader>x (close buffer) - we use Trouble with <leader>x now
 vim.keymap.del("n", "<leader>x")
-
--- add yours here
--- local map = vim.keymap.set
-local map = vim.keymap
+-- remove h for terminal, instead use mapping below
+vim.keymap.del("n", "<leader>h")
+-- Terminal toggle with Ctrl+/
+map.set({ "n", "t" }, "<C-/>", function()
+  require("nvchad.term").toggle({ pos = "sp", id = "htoggleTerm" })
+end, { desc = "Toggle horizontal terminal" })
 
 
 map.set("n", ";", ":", { desc = "CMD enter command mode" })
@@ -31,10 +35,6 @@ map.set({ "n", "i", "v" }, "<C-s>", "<cmd> w <cr>")
 -- Override NvChad's <leader>e to toggle instead of just focus
 map.set("n", "<leader>e", "<cmd>NvimTreeToggle<cr>", { desc = "Toggle file explorer" })
 
--- Terminal toggle with Ctrl+/ (like VSCode)
-map.set({ "n", "t" }, "<C-/>", function()
-  require("nvchad.term").toggle({ pos = "sp", id = "htoggleTerm" })
-end, { desc = "Toggle horizontal terminal" })
 
 vim.keymap.set("n", "<leader>c]", function()
     require("nvim-treesitter-textobjects.swap").swap_next("@parameter.inner")
