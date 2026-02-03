@@ -260,3 +260,5 @@ map.set("n", "<leader>bn", "<cmd>bnext<cr>", { desc = "Next Buffer" })
 map.set("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
 map.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Previous Buffer" })
 map.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer" })
+
+map.set("n", "<leader>uw", ":set wrap!<CR>", { desc = "Toggle word wrap" })

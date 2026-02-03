@@ -8,6 +8,8 @@ require "nvchad.options"
 local opt = vim.opt
 opt.relativenumber = true
 
+opt.wrap = false
+
 -- Tab settings (4 spaces)
 opt.tabstop = 4        -- Number of spaces a tab counts for
 opt.shiftwidth = 4     -- Size of an indent
