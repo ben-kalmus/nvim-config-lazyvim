@@ -28,7 +28,8 @@ map.set("i", "jk", "<ESC>")
 
 map.set({ "n", "i", "v" }, "<C-s>", "<cmd> w <cr>")
 
-
+-- Override NvChad's <leader>e to toggle instead of just focus
+map.set("n", "<leader>e", "<cmd>NvimTreeToggle<cr>", { desc = "Toggle file explorer" })
 
 vim.keymap.set("n", "<leader>c]", function()
     require("nvim-treesitter-textobjects.swap").swap_next("@parameter.inner")
