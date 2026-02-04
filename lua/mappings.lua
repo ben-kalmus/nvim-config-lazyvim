@@ -6,23 +6,23 @@ local del = function (mode, keymap)
     pcall(vim.keymap.del, mode, keymap)
 end
 
-  -- NvChad terminal toggles:
-  -- - Alt+h - Toggle horizontal terminal
-  -- - Alt+v - Toggle vertical terminal
-  -- - Alt+i - Toggle floating terminal
-
-  -- In terminal mode:
-  -- - Alt+h/v/i - Toggle back to normal mode
-  -- - <C-x> - Exit terminal mode (alternative to <C-\><C-n>)
+  -- <C-x> - Exit terminal mode (alternative to <C-\><C-n>)
 
   -- These are defined in NvChad's default mappings. Want me to add some additional convenient terminal keybindings, like:
   -- - <leader>th - Horizontal terminal
   -- - <leader>tv - Vertical terminal
   -- - <leader>tf - Floating terminal
   -- - <C-/> - Toggle terminal (like VSCode)
-
 -- Disable NvChad's default <leader>x (close buffer) - we use Trouble with <leader>x now
 del("n", "<leader>x")
+-- Disable NvChad's terminal toggles that conflict with FzfLua
+del("n", "<A-i>")  -- floating terminal
+del("n", "<A-h>")  -- horizontal terminal
+del("n", "<A-v>")  -- vertical terminal
+del("t", "<A-i>")  -- terminal mode
+del("t", "<A-h>")
+del("t", "<A-v>")
+
 -- NvChad's <leader>h (horizontal terminal) is overridden by Harpoon's quick menu in plugins/harpoon.lua
 -- Terminal toggle with Ctrl+/
 map.set({ "n", "t" }, "<C-/>", function()
