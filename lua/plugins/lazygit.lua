@@ -151,20 +151,46 @@ function M.open(opts)
     env(opts)
   end
 
-  -- Use NvChad's terminal
-  require("nvchad.term").toggle({
-    pos = "float",
-    cmd = table.concat(cmd, " "),
-    id = "lazygit",
-    float_opts = {
-      relative = "editor",
-      width = 0.9,
-      height = 0.9,
-      row = 0.05,
-      col = 0.05,
-      border = "single",
-    },
+  -- Create a floating window
+  local width = math.floor(vim.o.columns * 0.9)
+  local height = math.floor(vim.o.lines * 0.9)
+  local row = math.floor((vim.o.lines - height) / 2)
+  local col = math.floor((vim.o.columns - width) / 2)
+
+  -- Create buffer
+  local buf = vim.api.nvim_create_buf(false, true)
+
+  -- Create window
+  local win = vim.api.nvim_open_win(buf, true, {
+    relative = "editor",
+    width = width,
+    height = height,
+    row = row,
+    col = col,
+    style = "minimal",
+    border = "single",
   })
+
+  -- Set buffer options
+  vim.bo[buf].bufhidden = "wipe"
+
+  -- Start lazygit in terminal
+  vim.fn.termopen(cmd, {
+    on_exit = function()
+      vim.schedule(function()
+        -- Close window and buffer when lazygit exits
+        if vim.api.nvim_win_is_valid(win) then
+          vim.api.nvim_win_close(win, true)
+        end
+        if vim.api.nvim_buf_is_valid(buf) then
+          vim.api.nvim_buf_delete(buf, { force = true })
+        end
+      end)
+    end,
+  })
+
+  -- Enter terminal mode
+  vim.cmd("startinsert")
 end
 
 -- Opens lazygit with the log view
