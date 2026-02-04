@@ -35,7 +35,6 @@ end, { desc = "Toggle vertical terminal" })
 
 
 map.set("n", ";", ":", { desc = "CMD enter command mode" })
-map.set("i", "jk", "<ESC>")
 
 map.set({ "n", "i", "v" }, "<C-s>", "<cmd> w <cr>")
 
