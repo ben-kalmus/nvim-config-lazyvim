@@ -36,6 +36,14 @@ return {
 					vertical = "down:70%",
 				},
 			},
+			previewers = {
+				builtin = {
+					syntax_limit_b = 1024 * 100, -- 100KB
+					treesitter = {
+						enabled = true, -- Re-enabled after fixing except* in query file
+					},
+				},
+			},
 			-- Global keybindings available in all pickers
 			keymap = {
 				builtin = {
@@ -62,9 +70,9 @@ return {
 				-- Additional useful options
 				fd_opts = "--color=auto --type f --hidden --follow --exclude .git",
 				actions = {
-					["ctrl-g"] = function(selected, opts)
-						require("fzf-lua").live_grep({ query = vim.fn.expand("<cword>") })
-					end,
+					-- ["ctrl-g"] = function(selected, opts)
+					-- 	require("fzf-lua").live_grep({ query = vim.fn.expand("<cword>") })
+					-- end,
 					["alt-i"] = { actions.toggle_ignore },
 					["alt-h"] = { actions.toggle_hidden },
 				},
@@ -72,12 +80,12 @@ return {
 			grep = {
 				prompt_title = "Live Grep (use ! to exclude)",
 				-- Supports inverse patterns like "search !test.go"
-				rg_opts = "--column --line-number --no-heading --color=always --smart-case --max-columns=4096 -e",
-				actions = {
-					["ctrl-f"] = function(selected, opts)
-						require("fzf-lua").files()
-					end,
-				},
+				-- rg_opts = "--column --line-number --no-heading --color=always --smart-case --max-columns=4096 -e",
+				-- actions = {
+				-- 	["ctrl-f"] = function(selected, opts)
+				-- 		require("fzf-lua").files()
+				-- 	end,
+				-- },
 			},
 			lsp = {
 				-- Exclude declaration from references to avoid duplicates
