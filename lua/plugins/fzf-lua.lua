@@ -40,7 +40,7 @@ return {
 				builtin = {
 					syntax_limit_b = 1024 * 100, -- 100KB
 					treesitter = {
-						enabled = true, -- Re-enabled after fixing except* in query file
+						enabled = true,
 					},
 				},
 			},
@@ -58,6 +58,12 @@ return {
 
 					["ctrl-f"] = "preview-page-down",
 					["ctrl-b"] = "preview-page-up",
+
+					-- Word jumping in search input
+					["ctrl-left"] = "backward-word",
+					["ctrl-right"] = "forward-word",
+					["alt-b"] = "backward-word",
+					["alt-f"] = "forward-word",
 				},
 			},
 			files = {
