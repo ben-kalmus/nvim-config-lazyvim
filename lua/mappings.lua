@@ -15,6 +15,8 @@ end
   -- - <C-/> - Toggle terminal (like VSCode)
 -- Disable NvChad's default <leader>x (close buffer) - we use Trouble with <leader>x now
 del("n", "<leader>x")
+-- Disable NvChad's line number toggle
+del("n", "<leader>n")
 -- Disable NvChad's terminal toggles that conflict with FzfLua
 del("n", "<A-i>")  -- floating terminal
 del("n", "<A-h>")  -- horizontal terminal
@@ -261,3 +263,13 @@ map.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Previous Buffer" })
 map.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer" })
 
 map.set("n", "<leader>uw", ":set wrap!<CR>", { desc = "Toggle word wrap" })
+
+-- View messages (LazyVim style)
+map.set("n", "<leader>n", ":messages<cr>", { desc = "Messages" })
+
+-- Copy relative file path
+map.set("n", "<leader>fc", function()
+  local path = vim.fn.expand("%")
+  vim.fn.setreg("+", path)
+  vim.notify('Copied: ' .. path, vim.log.levels.INFO)
+end, { desc = "Copy relative file path" })
