@@ -6,6 +6,8 @@ local del = function (mode, keymap)
     pcall(vim.keymap.del, mode, keymap)
 end
 
+map.set("n", "<C-i>", "<C-i>")
+map.set("n", "<C-o>", "<C-o>")
   -- <C-x> - Exit terminal mode (alternative to <C-\><C-n>)
 
   -- These are defined in NvChad's default mappings. Want me to add some additional convenient terminal keybindings, like:
@@ -36,7 +38,7 @@ map.set({ "n", "t" }, "<C-\\>", function()
 end, { desc = "Toggle vertical terminal" })
 
 
-map.set("n", ";", ":", { desc = "CMD enter command mode" })
+-- map.set("n", ";", ":", { desc = "CMD enter command mode" })
 
 map.set({ "n", "i", "v" }, "<C-s>", "<cmd> w <cr>")
 
@@ -86,7 +88,7 @@ map.set("i", "<S-Tab>", "<C-d>", { desc = "Outdent line" })
 -- vim.keymap.set({ "n", "v" }, "<C-;>", "i<CR><Esc>", { noremap = true, desc = "Split line at cursor" })
 
 -- Git Hunk Navigation (Gitsigns)
-map.set("n", "]h", function()
+map.set({"n", "v"}, "]h", function()
     if vim.wo.diff then
         vim.cmd.normal({ "]c", bang = true })
     else
@@ -94,7 +96,7 @@ map.set("n", "]h", function()
     end
 end, { desc = "Next Git Hunk" })
 
-map.set("n", "[h", function()
+map.set({"n", "v"}, "[h", function()
     if vim.wo.diff then
         vim.cmd.normal({ "[c", bang = true })
     else
@@ -102,11 +104,11 @@ map.set("n", "[h", function()
     end
 end, { desc = "Previous Git Hunk" })
 
-map.set("n", "]H", function()
+map.set({"n", "v"}, "]H", function()
     require("gitsigns").nav_hunk("last")
 end, { desc = "Last Git Hunk" })
 
-map.set("n", "[H", function()
+map.set({"n", "v"}, "[H", function()
     require("gitsigns").nav_hunk("first")
 end, { desc = "First Git Hunk" })
 

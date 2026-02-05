@@ -29,6 +29,30 @@ local lsp_configs = {
   gopls = {
     settings = {
       gopls = vim.tbl_deep_extend("force", add_build_flags(), {
+        -- Allow gopls to analyze dependencies
+        directoryFilters = {
+          "-**/node_modules",
+          "+**/pkg/mod", -- Enable Go modules cache
+        },
+        -- Enable analysis of dependencies
+        analyses = {
+          unusedparams = true,
+          shadow = true,
+        },
+        staticcheck = true,
+        -- Better dependency analysis
+        experimentalWorkspaceModule = true,
+        allowImplicitNetworkAccess = true,
+        -- Deeper analysis
+        codelenses = {
+          gc_details = false,
+          generate = true,
+          regenerate_cgo = true,
+          test = true,
+          tidy = true,
+          upgrade_dependency = true,
+          vendor = true,
+        },
         hints = {
           assignVariableTypes = false,
           compositeLiteralFields = false,
