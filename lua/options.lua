@@ -10,6 +10,9 @@ opt.relativenumber = true
 
 opt.wrap = false
 
+-- Show search count (e.g., "[1/5]")
+opt.shortmess:remove("S")
+
 -- Tab settings (4 spaces)
 opt.tabstop = 4        -- Number of spaces a tab counts for
 opt.shiftwidth = 4     -- Size of an indent
