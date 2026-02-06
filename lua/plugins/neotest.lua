@@ -1,33 +1,42 @@
--- Function to get neotest arguments based on the current directory
-local function get_neotest_args()
-    local cwd = vim.fn.getcwd()
+-- Test argument presets for running tests with custom flags
+-- Use <leader>ta to select a preset when running tests
+-- Args must use = format (e.g., -provider=aws, not -provider aws)
+local arg_presets = {
+    ["Minimetis"] = {"-provider=aws", "-instance=local", "-domain=localhost", "-n=minimetis"},
+    -- Add more presets here
+}
 
-    -- Define directory-specific test arguments
-    local dir_args = {
-        -- Example patterns and their corresponding args
-        ["tests/e2e/compositions/"] = {
-            -- "-args",
-            -- "-provider=aws",
-            -- "-instance=local",
-            -- "-n=minimetis",
-            -- "-domain=localhost",
-        },
-    }
+local last_custom_args = nil
 
-    -- Check for exact directory matches
-    if dir_args[cwd] then
-        return dir_args[cwd]
+local function select_preset(callback)
+    local choices = { "Custom (enter manually)" }
+
+    if last_custom_args then
+        table.insert(choices, "Last Used: " .. table.concat(last_custom_args, " "))
     end
 
-    -- Check for partial directory matches
-    for dir, args in pairs(dir_args) do
-        if cwd:match(dir) then
-            return args
+    for name in pairs(arg_presets) do
+        table.insert(choices, name)
+    end
+
+    vim.ui.select(choices, { prompt = "Select test args preset:" }, function(choice)
+        if not choice then return end
+
+        if choice == "Custom (enter manually)" then
+            local default_str = last_custom_args and table.concat(last_custom_args, " ") or ""
+            vim.ui.input({ prompt = "Test args: ", default = default_str }, function(input)
+                if input and input ~= "" then
+                    last_custom_args = vim.split(input, " ")
+                    callback(last_custom_args)
+                end
+            end)
+        elseif choice:match("^Last Used:") then
+            callback(last_custom_args)
+        else
+            last_custom_args = arg_presets[choice]
+            callback(arg_presets[choice])
         end
-    end
-
-    -- Default arguments if no match is found
-    return {}
+    end)
 end
 
 return {
@@ -43,6 +52,13 @@ return {
         { "<leader>tt", function() require("neotest").run.run(vim.fn.expand("%")) end, desc = "Run File (Neotest)" },
         { "<leader>tT", function() require("neotest").run.run(vim.uv.cwd()) end, desc = "Run All Test Files (Neotest)" },
         { "<leader>tr", function() require("neotest").run.run() end, desc = "Run Nearest (Neotest)" },
+        { "<leader>ta", function()
+            select_preset(function(args)
+                local test_args = vim.deepcopy(args)
+                table.insert(test_args, 1, "-args")
+                require("neotest").run.run({ extra_args = { go_test_args = test_args } })
+            end)
+        end, desc = "Run Nearest with Args (Neotest)" },
         { "<leader>td", function() require("neotest").run.run({ strategy = "dap" }) end, desc = "Debug Nearest (Neotest)" },
         { "<leader>tl", function() require("neotest").run.run_last() end, desc = "Run Last (Neotest)" },
         { "<leader>tL", function() require("neotest").run.run_last({ strategy = "dap" }) end, desc = "Debug Last (Neotest)" },
@@ -67,12 +83,6 @@ return {
                     "-race",
                     "-count=1",
                     "-timeout=200s",
-                    -- TODO: write a function that automatically appends these args if in metis e2e directory
-                    -- "-args",
-                    -- "-provider=aws",
-                    -- "-instance=local",
-                    -- "-n=minimetis",
-                    -- "-domain=localhost",
                 },
                 dap_go_enabled = true,
             },
