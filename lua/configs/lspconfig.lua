@@ -112,8 +112,10 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		map("n", "<leader>ss", "<cmd>FzfLua lsp_document_symbols<cr>", "Document Symbols")
 		map("n", "<leader>sS", "<cmd>FzfLua lsp_workspace_symbols<cr>", "Workspace Symbols")
 
-		-- Code actions
-		map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, "Code Action")
+		-- Code actions (using actions-preview for better UI)
+		map({ "n", "v" }, "<leader>ca", function()
+			require("actions-preview").code_actions()
+		end, "Code Action")
 		map("n", "<leader>cr", vim.lsp.buf.rename, "Rename")
 		map({ "n", "v" }, "<leader>cf", function()
 			vim.lsp.buf.format({ bufnr = bufnr })
