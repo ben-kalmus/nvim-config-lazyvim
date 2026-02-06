@@ -87,21 +87,32 @@ map.set("i", "<S-Tab>", "<C-d>", { desc = "Outdent line" })
 -- Split a line at cursor position. Opposite of J in normal mode which join line below to current line.
 -- vim.keymap.set({ "n", "v" }, "<C-;>", "i<CR><Esc>", { noremap = true, desc = "Split line at cursor" })
 
+-- Vim Diff Navigation (for :diffthis, :diffsplit, etc.)
+map.set({"n", "v"}, "]x", function()
+    if vim.wo.diff then
+        vim.cmd.normal({ "]c", bang = true })
+    end
+end, { desc = "Next Diff Change" })
+
+map.set({"n", "v"}, "[x", function()
+    if vim.wo.diff then
+        vim.cmd.normal({ "[c", bang = true })
+    end
+end, { desc = "Previous Diff Change" })
+
 -- Git Hunk Navigation (Gitsigns)
 map.set({"n", "v"}, "]h", function()
     if vim.wo.diff then
-        vim.cmd.normal({ "]c", bang = true })
-    else
-        require("gitsigns").nav_hunk("next")
+        return
     end
+    require("gitsigns").nav_hunk("next")
 end, { desc = "Next Git Hunk" })
 
 map.set({"n", "v"}, "[h", function()
     if vim.wo.diff then
-        vim.cmd.normal({ "[c", bang = true })
-    else
-        require("gitsigns").nav_hunk("prev")
+        return
     end
+    require("gitsigns").nav_hunk("prev")
 end, { desc = "Previous Git Hunk" })
 
 map.set({"n", "v"}, "]H", function()
