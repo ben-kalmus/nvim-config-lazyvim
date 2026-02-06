@@ -164,15 +164,78 @@ map.set({ "n", "v" }, "<leader>gwd", function()
     end)
 end, { noremap = true, silent = true, desc = "Delete git worktree" })
 
--- DiffView
-map.set(
-    { "n", "v" },
-    "<leader>gH",
-    [[:DiffviewFileHistory<CR>]],
-    { noremap = true, silent = true, desc = "DiffView File History (selection)" }
-)
-map.set({ "n", "v" }, "<leader>DD", [[:DiffviewClose<CR>]], { noremap = true, silent = true, desc = "DiffViewClose" })
-map.set({ "n", "v" }, "<leader>DO", [[:DiffviewOpen<CR>]], { noremap = true, silent = true, desc = "DiffViewOpen" })
+-- DiffView (Git diffs)
+map.set("n", "<leader>DO", "<cmd>DiffviewOpen<cr>", { desc = "Open Diffview" })
+map.set("n", "<leader>DD", "<cmd>DiffviewClose<cr>", { desc = "Close Diffview" })
+map.set("n", "<leader>gdh", "<cmd>DiffviewFileHistory %<cr>", { desc = "File History (current)" })
+map.set("v", "<leader>gdh", ":'<,'>DiffviewFileHistory<cr>", { desc = "File History (selection)" })
+map.set("n", "<leader>gdH", "<cmd>DiffviewFileHistory<cr>", { desc = "File History (all)" })
+map.set("n", "<leader>gdm", "<cmd>DiffviewOpen HEAD<cr>", { desc = "Diff uncommited changes" })
+map.set("n", "<leader>gdM", "<cmd>DiffviewOpen HEAD~1<cr>", { desc = "Diff last commit" })
+map.set("n", "<leader>gdb", function()
+    vim.ui.input({ prompt = "Compare branch: " }, function(branch)
+        if branch then vim.cmd("DiffviewOpen " .. branch) end
+    end)
+end, { desc = "Diff with branch" })
+
+-- Smart diff against base branch (main/master/develop)
+map.set("n", "<leader>gdd", function()
+    -- Check remote branches first (more accurate), then local
+    local base_candidates = {
+        "origin/main",
+        "origin/master",
+        "main",
+        "master",
+    }
+
+    local base_branch = nil
+    for _, branch in ipairs(base_candidates) do
+        local result = vim.fn.system("git rev-parse --verify " .. branch .. " 2>/dev/null")
+        if vim.v.shell_error == 0 then
+            base_branch = branch
+            break
+        end
+    end
+
+    if not base_branch then
+        vim.notify("Could not find base branch", vim.log.levels.WARN)
+        return
+    end
+
+    -- Use three-dot syntax to diff against merge-base (where we branched from)
+    vim.cmd("DiffviewOpen " .. base_branch .. "...")
+    vim.notify("Comparing against " .. base_branch, vim.log.levels.INFO)
+end, { desc = "Diff from base branch" })
+
+-- File Diffing (non-git)
+map.set("n", "<leader>gdf", function()
+    require("fzf-lua").files({
+        prompt = "Diff current file with: ",
+        actions = {
+            ["default"] = function(selected, opts)
+                if selected and #selected > 0 then
+                    local file = require("fzf-lua").path.entry_to_file(selected[1], opts)
+                    vim.cmd("vertical diffsplit " .. vim.fn.fnameescape(file.path))
+                end
+            end
+        }
+    })
+end, { desc = "Diff current file (picker)" })
+-- map.set("n", "<leader>gdb", function()
+--     require("fzf-lua").buffers({
+--         prompt = "Diff current file with buffer: ",
+--         actions = {
+--             ["default"] = function(selected)
+--                 if selected and selected[1] then
+--                     local bufnr = selected[1]:match("^%[(%d+)")
+--                     if bufnr then
+--                         vim.cmd("vertical diffsplit #" .. bufnr)
+--                     end
+--                 end
+--             end
+--         }
+--     })
+-- end, { desc = "Diff with buffer (picker)" })
 
 -- persistent breakpoints plugin
 -- Save breakpoints to file automatically.
