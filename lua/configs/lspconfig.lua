@@ -124,7 +124,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		-- Documentation
 		map("n", "K", vim.lsp.buf.hover, "Hover Documentation")
 		map("n", "gK", vim.lsp.buf.signature_help, "Signature Help")
-		-- map("i", "<C-k>", vim.lsp.buf.signature_help, "Signature Help")
 
 		-- Diagnostics
 		map("n", "<leader>cd", vim.diagnostic.open_float, "Line Diagnostics")
@@ -132,5 +131,49 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		map("n", "[d", vim.diagnostic.goto_prev, "Prev Diagnostic")
 	end,
 })
+
+-- Debug and fix LSP hover rendering
+vim.lsp.handlers["textDocument/hover"] = function(err, result, ctx, config)
+	if err or not result or not result.contents then
+		return
+	end
+
+	config = config or {}
+	config.border = "rounded"
+	config.focusable = true
+	config.stylize_markdown = false -- Disable markdown styling
+
+	-- Use plain text rendering
+	local bufnr, winnr = vim.lsp.util.open_floating_preview(
+		vim.lsp.util.convert_input_to_markdown_lines(result.contents, {}),
+		"markdown",
+		config
+	)
+
+	if bufnr and winnr then
+		-- Force plain text rendering
+		vim.bo[bufnr].filetype = ""
+		vim.bo[bufnr].syntax = "off"
+		vim.wo[winnr].conceallevel = 0
+		vim.wo[winnr].concealcursor = ""
+		vim.wo[winnr].wrap = true
+
+		-- Completely disable treesitter
+		vim.api.nvim_buf_call(bufnr, function()
+			pcall(vim.treesitter.stop, bufnr)
+		end)
+
+		-- Debug: print what's actually in the buffer
+		vim.defer_fn(function()
+			if vim.api.nvim_buf_is_valid(bufnr) then
+				local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+				print("Hover buffer filetype:", vim.bo[bufnr].filetype)
+				print("First line:", lines[1] or "empty")
+			end
+		end, 100)
+	end
+
+	return bufnr, winnr
+end
 
 -- read :h vim.lsp.config for changing options of lsp servers
