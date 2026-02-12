@@ -26,6 +26,7 @@ del("n", "<A-v>") -- vertical terminal
 del("t", "<A-i>") -- terminal mode
 del("t", "<A-h>")
 del("t", "<A-v>")
+del("n", "<leader>b") -- disable NvChad's new buffer keybind
 
 -- NvChad's <leader>h (horizontal terminal) is overridden by Harpoon's quick menu in plugins/harpoon.lua
 -- Terminal toggle with Ctrl+/
@@ -331,17 +332,22 @@ local function delete_buffer(force)
 end
 
 map.set("n", "<leader>bd", function()
-	delete_buffer(false)
+	require("nvchad.tabufline").close_buffer()
 end, { desc = "Delete Buffer" })
+map.set("n", "<leader>bn", ":enew<cr>", { desc = "Delete Buffer" })
 map.set("n", "<leader>bD", function()
 	delete_buffer(true)
 end, { desc = "Delete Buffer (force)" })
-map.set("n", "<leader>bo", "<cmd>%bd|e#|bd#<cr>", { desc = "Delete Other Buffers" })
-map.set("n", "<leader>bp", "<cmd>bprevious<cr>", { desc = "Previous Buffer" })
-map.set("n", "<leader>bn", "<cmd>bnext<cr>", { desc = "Next Buffer" })
+map.set("n", "<leader>bo", function()
+	require("nvchad.tabufline").closeAllBufs(false) -- keeps open buffer
+end, { desc = "Delete Other Buffers" })
 map.set("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
-map.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Previous Buffer" })
-map.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer" })
+map.set("n", "<S-h>", function()
+	require("nvchad.tabufline").prev()
+end, { desc = "Previous Buffer" })
+map.set("n", "<S-l>", function()
+	require("nvchad.tabufline").next()
+end, { desc = "Next Buffer" })
 
 map.set("n", "<leader>uw", ":set wrap!<CR>", { desc = "Toggle word wrap" })
 
