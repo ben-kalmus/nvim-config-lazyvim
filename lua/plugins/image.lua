@@ -69,5 +69,47 @@ return {
 				end
 			end,
 		})
+
+		-- Toggle functionality
+		_G.image_nvim_enabled = true
+
+		-- Continuously clear images when disabled
+		vim.api.nvim_create_autocmd({
+			"CursorMoved",
+			"CursorMovedI",
+			"InsertEnter",
+			"InsertLeave",
+			"TextChanged",
+			"TextChangedI",
+			"BufEnter",
+		}, {
+			group = group,
+			callback = function()
+				if not _G.image_nvim_enabled then
+					vim.schedule(function()
+						image.clear()
+					end)
+				end
+			end,
+		})
+
+		_G.toggle_image_nvim = function()
+			_G.image_nvim_enabled = not _G.image_nvim_enabled
+			if _G.image_nvim_enabled then
+				vim.notify("✓ Image rendering enabled", vim.log.levels.INFO)
+			else
+				image.clear()
+				vim.notify("✗ Image rendering disabled", vim.log.levels.WARN)
+			end
+		end
 	end,
+	keys = {
+		{
+			"<leader>i",
+			function()
+				_G.toggle_image_nvim()
+			end,
+			desc = "Toggle Image Rendering",
+		},
+	},
 }
