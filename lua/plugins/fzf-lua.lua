@@ -38,9 +38,12 @@ return {
 			},
 			previewers = {
 				builtin = {
-					syntax_limit_b = 1024 * 100, -- 100KB
+					syntax_limit_b = 1024 * 1024, -- 1MB (was 100KB)
+					syntax_limit_l = 5000,         -- also cap by line count
+					delay = 20,                    -- ms before rendering, reduces flicker
 					treesitter = {
 						enabled = true,
+						context_window = 200,      -- limit lines treesitter parses for context
 					},
 				},
 			},
