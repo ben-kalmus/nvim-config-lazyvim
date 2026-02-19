@@ -26,6 +26,26 @@ end
 
 -- Custom LSP server configurations
 local lsp_configs = {
+	-- basedpyright handles all Python intelligence: go-to-def, references, hover, completions
+	basedpyright = {
+		settings = {
+			basedpyright = {
+				disableOrganizeImports = true, -- ruff handles imports
+				analysis = {
+					autoSearchPaths = true,
+					useLibraryCodeForTypes = true,
+					diagnosticMode = "workspace",
+				},
+			},
+		},
+	},
+	-- Ruff handles only linting and formatting, not navigation
+	ruff = {
+		on_attach = function(client)
+			-- Disable hover and completions so Pyright handles them
+			client.server_capabilities.hoverProvider = false
+		end,
+	},
 	gopls = {
 		settings = {
 			gopls = vim.tbl_deep_extend("force", add_build_flags(), {
@@ -162,15 +182,6 @@ vim.lsp.handlers["textDocument/hover"] = function(err, result, ctx, config)
 		vim.api.nvim_buf_call(bufnr, function()
 			pcall(vim.treesitter.stop, bufnr)
 		end)
-
-		-- Debug: print what's actually in the buffer
-		vim.defer_fn(function()
-			if vim.api.nvim_buf_is_valid(bufnr) then
-				local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-				print("Hover buffer filetype:", vim.bo[bufnr].filetype)
-				print("First line:", lines[1] or "empty")
-			end
-		end, 100)
 	end
 
 	return bufnr, winnr

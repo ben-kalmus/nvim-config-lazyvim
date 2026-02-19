@@ -20,6 +20,7 @@ return {
 			"bash",
 			"markdown",
 			"markdown_inline",
+			"toml",
 		},
 		auto_install = true,
 		highlight = {
