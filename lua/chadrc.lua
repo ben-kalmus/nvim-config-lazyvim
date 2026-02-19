@@ -8,10 +8,12 @@ local M = {}
 M.base46 = {
 	theme = "onedark",
 
-	-- hl_override = {
-	-- 	Comment = { italic = true },
-	-- 	["@comment"] = { italic = true },
-	-- },
+	hl_override = {
+		-- Replace jarring yellow search highlights with muted blue
+		Search    = { bg = "#2d4a6e", fg = "#c8ccd4" }, -- dim blue bg, soft text
+		IncSearch = { bg = "#61afef", fg = "#1e222a" }, -- bright blue bg, dark text (current match while typing)
+		CurSearch = { bg = "#61afef", fg = "#1e222a" }, -- same as IncSearch (focused match)
+	},
 }
 
 -- M.nvdash = { load_on_startup = true }

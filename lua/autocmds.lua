@@ -1,5 +1,18 @@
 require("nvchad.autocmds")
 
+-- Override jarring yellow search highlights with muted blue
+local function set_search_highlights()
+	vim.api.nvim_set_hl(0, "Search",    { bg = "#2d4a6e", fg = "#c8ccd4" })
+	vim.api.nvim_set_hl(0, "IncSearch", { bg = "#61afef", fg = "#1e222a" })
+	vim.api.nvim_set_hl(0, "CurSearch", { bg = "#61afef", fg = "#1e222a" })
+end
+
+set_search_highlights()
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+	callback = set_search_highlights,
+})
+
 -- Only show errors for Python LSPs (basedpyright + ruff), not warnings
 local python_lsp_error_only = {
 	virtual_text = { severity = { min = vim.diagnostic.severity.ERROR } },
