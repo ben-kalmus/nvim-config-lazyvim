@@ -25,6 +25,12 @@ opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 opt.foldlevel = 99 -- Open all folds by default
 opt.foldlevelstart = 99 -- Open all folds when opening a file
 opt.foldenable = true
+
+-- Auto-reload files changed outside of Neovim
+opt.autoread = true
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter" }, {
+	command = "checktime",
+})
 -- opt.timeoutlen = 50 -- vim.g.vscode and 1000 or 300 --  Lower than default (1000) to quickly trigger which-key
 -- opt.smartindent = true
 --
