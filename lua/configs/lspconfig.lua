@@ -85,6 +85,19 @@ local lsp_configs = {
 			}),
 		},
 	},
+	clangd = {
+		cmd = {
+			vim.fn.stdpath("data") .. "/mason/bin/clangd",
+			"--background-index",
+			"--clang-tidy",
+			"--completion-style=detailed",
+			"--header-insertion=never",
+			"--compile-commands-dir=build/Debug",
+		},
+		init_options = {
+			clangdFileStatus = true,
+		},
+	},
 }
 
 -- Setup mason-lspconfig to automatically configure all installed servers
@@ -94,7 +107,8 @@ require("mason-lspconfig").setup({
 		-- Default handler for all servers
 		function(server_name)
 			local config = lsp_configs[server_name] or {}
-			vim.lsp.enable(server_name, config)
+			vim.lsp.config(server_name, config)
+			vim.lsp.enable(server_name)
 		end,
 	},
 })
