@@ -32,6 +32,7 @@ return {
 				height = 0.9,
 				width = 0.9,
 				preview = {
+					delay = 20,
 					layout = "vertical",
 					vertical = "down:70%",
 				},
@@ -39,11 +40,10 @@ return {
 			previewers = {
 				builtin = {
 					syntax_limit_b = 1024 * 1024, -- 1MB (was 100KB)
-					syntax_limit_l = 5000,         -- also cap by line count
-					delay = 20,                    -- ms before rendering, reduces flicker
+					syntax_limit_l = 5000, -- also cap by line count
 					treesitter = {
 						enabled = true,
-						context_window = 200,      -- limit lines treesitter parses for context
+						context_window = 200, -- limit lines treesitter parses for context
 					},
 				},
 			},
