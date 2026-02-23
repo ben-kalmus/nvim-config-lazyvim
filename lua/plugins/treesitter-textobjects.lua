@@ -186,13 +186,13 @@ return {
 			end
 
 			-- Create swap keymaps
-			vim.keymap.set("n", "<leader>a", function()
-				require("nvim-treesitter-textobjects.swap").swap_next("@parameter.inner")
-			end, { buffer = buf, desc = "Swap next parameter", silent = true })
-
-			vim.keymap.set("n", "<leader>A", function()
-				require("nvim-treesitter-textobjects.swap").swap_previous("@parameter.inner")
-			end, { buffer = buf, desc = "Swap previous parameter", silent = true })
+			-- vim.keymap.set("n", "<leader>a", function()
+			-- 	require("nvim-treesitter-textobjects.swap").swap_next("@parameter.inner")
+			-- end, { buffer = buf, desc = "Swap next parameter", silent = true })
+			--
+			-- vim.keymap.set("n", "<leader>A", function()
+			-- 	require("nvim-treesitter-textobjects.swap").swap_previous("@parameter.inner")
+			-- end, { buffer = buf, desc = "Swap previous parameter", silent = true })
 
 			-- Peek definition
 			vim.keymap.set("n", "gp", peek_definition, { buffer = buf, desc = "Peek definition", silent = true })
