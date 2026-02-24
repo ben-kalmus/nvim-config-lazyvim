@@ -89,6 +89,14 @@ map.set("t", "<C-j>", "<cmd>wincmd j<cr>", { desc = "Move to window below" })
 map.set("t", "<C-k>", "<cmd>wincmd k<cr>", { desc = "Move to window above" })
 map.set("t", "<C-l>", "<cmd>wincmd l<cr>", { desc = "Move to right window" })
 
+-- Forward Ctrl+Arrow word-jump sequences to the terminal process
+map.set("t", "<C-Left>", function()
+	vim.fn.chansend(vim.b.terminal_job_id, "\27b")
+end, { desc = "Word left in terminal" })
+map.set("t", "<C-Right>", function()
+	vim.fn.chansend(vim.b.terminal_job_id, "\27f")
+end, { desc = "Word right in terminal" })
+
 -- Split a line at cursor position. Opposite of J in normal mode which join line below to current line.
 -- vim.keymap.set({ "n", "v" }, "<C-;>", "i<CR><Esc>", { noremap = true, desc = "Split line at cursor" })
 
