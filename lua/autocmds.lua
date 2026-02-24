@@ -1,10 +1,21 @@
 require("nvchad.autocmds")
 
--- Auto-enter terminal mode when focusing a terminal window
-vim.api.nvim_create_autocmd("WinEnter", {
+-- Remember and restore terminal mode state per buffer
+vim.api.nvim_create_autocmd("WinLeave", {
 	callback = function()
 		if vim.bo.buftype == "terminal" then
-			vim.cmd("startinsert")
+			vim.b.term_insert_mode = vim.fn.mode() == "t"
+		end
+	end,
+})
+
+vim.api.nvim_create_autocmd("WinEnter", {
+	callback = function()
+		if vim.bo.buftype == "terminal" and vim.api.nvim_win_get_config(0).relative == "" then
+			-- Default to terminal mode on first visit (vim.b.term_insert_mode is nil)
+			if vim.b.term_insert_mode ~= false then
+				vim.cmd("startinsert")
+			end
 		end
 	end,
 })
