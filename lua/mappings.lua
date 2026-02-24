@@ -83,6 +83,12 @@ map.set({ "n", "v" }, "zh", "zH", { noremap = true })
 -- outdent line to the left
 map.set("i", "<S-Tab>", "<C-d>", { desc = "Outdent line" })
 
+-- Window navigation from terminal mode
+map.set("t", "<C-h>", "<cmd>wincmd h<cr>", { desc = "Move to left window" })
+map.set("t", "<C-j>", "<cmd>wincmd j<cr>", { desc = "Move to window below" })
+map.set("t", "<C-k>", "<cmd>wincmd k<cr>", { desc = "Move to window above" })
+map.set("t", "<C-l>", "<cmd>wincmd l<cr>", { desc = "Move to right window" })
+
 -- Split a line at cursor position. Opposite of J in normal mode which join line below to current line.
 -- vim.keymap.set({ "n", "v" }, "<C-;>", "i<CR><Esc>", { noremap = true, desc = "Split line at cursor" })
 

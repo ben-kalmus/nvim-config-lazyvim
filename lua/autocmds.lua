@@ -1,5 +1,14 @@
 require("nvchad.autocmds")
 
+-- Auto-enter terminal mode when focusing a terminal window
+vim.api.nvim_create_autocmd("WinEnter", {
+	callback = function()
+		if vim.bo.buftype == "terminal" then
+			vim.cmd("startinsert")
+		end
+	end,
+})
+
 -- Override jarring yellow search highlights with muted blue
 local function set_search_highlights()
 	vim.api.nvim_set_hl(0, "Search",    { bg = "#2d4a6e", fg = "#c8ccd4" })
