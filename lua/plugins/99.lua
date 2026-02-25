@@ -5,7 +5,7 @@ return {
 	},
 	keys = {
 		{
-			"<leader>aa",
+			"<leader>0a",
 			function()
 				require("99").visual()
 			end,
@@ -13,21 +13,21 @@ return {
 			mode = { "n", "v" },
 		},
 		{
-			"<leader>ax",
+			"<leader>0x",
 			function()
 				require("99").stop_all_requests()
 			end,
 			desc = "99: Stop all requests",
 		},
 		{
-			"<leader>as",
+			"<leader>0s",
 			function()
 				require("99").search()
 			end,
 			desc = "99: Search",
 		},
 		{
-			"<leader>am",
+			"<leader>0m",
 			function()
 				require("99.extensions.fzf_lua").select_model()
 			end,
@@ -36,7 +36,7 @@ return {
 		-- Keybinding: <leader>ap opens a provider selection menu via fzf-lua
 		-- Allows switching between different AI providers (e.g., Claude, OpenAI)
 		{
-			"<leader>ap",
+			"<leader>0p",
 			function()
 				require("99.extensions.fzf_lua").select_provider()
 			end,
