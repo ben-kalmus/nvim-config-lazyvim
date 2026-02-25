@@ -365,8 +365,16 @@ end, { desc = "Next Buffer" })
 
 map.set("n", "<leader>uw", ":set wrap!<CR>", { desc = "Toggle word wrap" })
 
--- View messages (LazyVim style)
-map.set("n", "<leader>n", ":messages<cr>", { desc = "Messages" })
+-- Snacks notification system (replaces vim.notify)
+map.set("n", "<leader>n", function()
+	require("snacks").notifier.show_history()
+end, { desc = "Notification History (Snacks)" })
+map.set("n", "<leader>un", function()
+	require("snacks").notifier.hide()
+end, { desc = "Dismiss All Notifications" })
+
+-- Vim messages (original command-line messages)
+map.set("n", "<leader>nm", ":messages<cr>", { desc = "Vim :messages" })
 
 -- Copy relative file path
 map.set("n", "<leader>fc", function()
