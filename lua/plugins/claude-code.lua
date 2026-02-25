@@ -1,57 +1,66 @@
 return {
-	"greggh/claude-code.nvim",
-	enabled = false, -- Disabled in favor of opencode.nvim
+	"coder/claudecode.nvim",
 	dependencies = {
-		"nvim-lua/plenary.nvim",
+		"folke/snacks.nvim",
 	},
 	keys = {
-		-- { "<C-,>", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude Code", mode = { "n", "t" } },
-		-- { "<leader>cc", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude Code" },
-		{ "<leader>aC", "<cmd>ClaudeCodeContinue<cr>", desc = "Continue Claude Code" },
-		{ "<leader>aR", "<cmd>ClaudeCodeResume<cr>", desc = "Resume Claude Code Session" },
+		-- Main Claude Code commands
+		{ "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude Code" },
+		{ "<leader>af", "<cmd>ClaudeCodeFocus<cr>", desc = "Focus Claude Code" },
+		{ "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude Code" },
+		{ "<leader>aR", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude Code Session" },
 		{ "<leader>aV", "<cmd>ClaudeCodeVerbose<cr>", desc = "Claude Code Verbose" },
-		-- {
-		-- 	"<leader>as",
-		-- 	"<cmd>ClaudeCodeSend<cr>",
-		-- 	mode = "v",
-		-- 	desc = "Claude send Selection",
-		-- },
+
+		-- Model and context management
+		{ "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude Model" },
+		{ "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add Current Buffer to Claude" },
+		{
+			"<leader>aS",
+			"<cmd>ClaudeCodeSend<cr>",
+			mode = "v",
+			desc = "Send Selection to Claude",
+		},
+
+		-- Tree file additions (capital T for Claude)
+		{
+			"<leader>aT",
+			"<cmd>ClaudeCodeTreeAdd<cr>",
+			desc = "Add File from Tree to Claude",
+			ft = { "NvimTree", "neo-tree", "oil", "minifiles", "netrw" },
+		},
+
+		-- Diff management (capital A and D to avoid opencode conflicts)
+		{ "<leader>aA", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept Claude Diff" },
+		{ "<leader>aD", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny Claude Diff" },
 	},
 	opts = {
-		window = {
-			split_ratio = 0.4, -- Terminal takes 40% of screen
-			position = "vertical", -- Bottom right split
-			enter_insert = true, -- Auto-enter insert mode
+		-- Server Configuration
+		port_range = { min = 10000, max = 65535 },
+		auto_start = true,
+		log_level = "info",
 
-			-- Alternative: Use floating window (uncomment if preferred)
-			-- position = "float",
-			-- float = {
-			--   width = "85%",
-			--   height = "85%",
-			--   row = "center",
-			--   col = "center",
-			--   border = "rounded",
-			-- },
+		-- Selection Tracking
+		track_selection = true,
+		visual_demotion_delay_ms = 50,
+
+		-- Terminal Configuration
+		terminal = {
+			split_side = "right",
+			split_width_percentage = 0.40,
+			provider = "snacks",
+			auto_close = true,
 		},
-		refresh = {
-			enable = true, -- Auto-reload modified files
-			updatetime = 100, -- Check interval (ms)
-		},
-		git = {
-			use_git_root = true, -- Use git root as working directory
-		},
-		keymaps = {
-			toggle = {
-				normal = "<C-,>", -- Normal mode toggle
-				terminal = "<C-,>", -- Terminal mode toggle
-				variants = {
-					continue = "<leader>cC", -- Resume last conversation
-					verbose = "<leader>cV", -- Enable verbose output
-				},
-			},
+
+		-- Git integration - use git root as working directory
+		git_repo_cwd = true,
+
+		-- Diff Integration
+		diff_opts = {
+			auto_close_on_accept = true,
+			vertical_split = true,
+			open_in_current_tab = true,
+			keep_terminal_focus = false,
 		},
 	},
-	config = function(_, opts)
-		require("claude-code").setup(opts)
-	end,
+	config = true,
 }
