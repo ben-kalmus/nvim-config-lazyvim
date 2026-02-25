@@ -42,6 +42,9 @@ return {
 					},
 				},
 			},
+			lsp = {
+				enabled = true,
+			},
 		}
 
 		vim.o.autoread = true -- Required for `opts.events.reload`
