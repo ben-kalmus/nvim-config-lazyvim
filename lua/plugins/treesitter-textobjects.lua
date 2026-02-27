@@ -197,15 +197,6 @@ return {
 			-- Peek definition
 			vim.keymap.set("n", "gp", peek_definition, { buffer = buf, desc = "Peek definition", silent = true })
 
-			-- LSP symbol navigation (alternative to treesitter)
-			vim.keymap.set("n", "]F", function()
-				goto_lsp_symbol("next")
-			end, { buffer = buf, desc = "Next LSP symbol", silent = true })
-
-			vim.keymap.set("n", "[F", function()
-				goto_lsp_symbol("prev")
-			end, { buffer = buf, desc = "Previous LSP symbol", silent = true })
-
 			-- Select entire buffer
 			vim.keymap.set(
 				{ "x", "o" },
