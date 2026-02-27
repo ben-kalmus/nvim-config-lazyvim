@@ -1,5 +1,15 @@
 require("nvchad.configs.lspconfig").defaults()
 
+-- Global toggle for format on save (default: enabled)
+vim.g.format_on_save = true
+
+-- Toggle format on save command
+vim.api.nvim_create_user_command("ToggleFormatOnSave", function()
+	vim.g.format_on_save = not vim.g.format_on_save
+	local status = vim.g.format_on_save and "enabled" or "disabled"
+	vim.notify("Format on save " .. status, vim.log.levels.INFO)
+end, { desc = "Toggle format on save" })
+
 -- Helper function to add build flags for gopls
 local function add_build_flags()
 	local mappings = {
@@ -125,7 +135,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			vim.api.nvim_create_autocmd("BufWritePre", {
 				buffer = bufnr,
 				callback = function()
-					vim.lsp.buf.format({ bufnr = bufnr })
+					if vim.g.format_on_save then
+						vim.lsp.buf.format({ bufnr = bufnr })
+					end
 				end,
 			})
 		end
