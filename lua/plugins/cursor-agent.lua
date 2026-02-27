@@ -4,10 +4,10 @@ return {
 	branch = "sidebar-instead-of-floating-window",
 	cmd = { "CursorAgent", "CursorAgentSelection", "CursorAgentBuffer" },
 	keys = {
-		{ "<C-.>", "<cmd>CursorAgent<CR>", desc = "Cursor Agent: Toggle terminal", mode = { "n", "t" } },
-		-- { "<leader>aa", "<cmd>CursorAgent<CR>", desc = "Cursor Agent: Toggle terminal", mode = "n" },
-		{ "<leader>aA", ":<C-u>CursorAgentSelection<CR>", desc = "Cursor Agent: Send selection", mode = "v" },
-		{ "<leader>aB", "<cmd>CursorAgentBuffer<CR>", desc = "Cursor Agent: Send buffer", mode = "n" },
+		-- { "<C-.>", "<cmd>CursorAgent<CR>", desc = "Cursor Agent: Toggle terminal", mode = { "n", "t" } },
+		{ "<leader>CC", "<cmd>CursorAgent<CR>", desc = "Cursor Agent: Toggle terminal", mode = "n" },
+		{ "<leader>CS", ":<C-u>CursorAgentSelection<CR>", desc = "Cursor Agent: Send selection", mode = "v" },
+		{ "<leader>CB", "<cmd>CursorAgentBuffer<CR>", desc = "Cursor Agent: Send buffer", mode = "n" },
 	},
 	opts = {
 		cmd = "cursor-agent", -- Cursor Agent CLI command
