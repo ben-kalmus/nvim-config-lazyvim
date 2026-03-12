@@ -1,3 +1,16 @@
+local opencode_cmd = "opencode --port"
+
+local snacks_terminal_opts = {
+	win = {
+		position = "right",
+		enter = false,
+		on_win = function(win)
+			-- Set up keymaps and cleanup for an arbitrary terminal
+			require("opencode.terminal").setup(win.win)
+		end,
+	},
+}
+
 return {
 	"nickjvandyke/opencode.nvim",
 	event = "VeryLazy",
@@ -31,16 +44,17 @@ return {
 	config = function()
 		---@type opencode.Opts
 		vim.g.opencode_opts = {
-			-- Use snacks provider for terminal management
-			provider = {
-				enabled = "snacks",
-				cmd = "opencode --port",
-				snacks = {
-					win = {
-						position = "right",
-						enter = false,
-					},
-				},
+
+			server = {
+				start = function()
+					require("snacks.terminal").open(opencode_cmd, snacks_terminal_opts)
+				end,
+				stop = function()
+					require("snacks.terminal").get(opencode_cmd, snacks_terminal_opts):close()
+				end,
+				toggle = function()
+					require("snacks.terminal").toggle(opencode_cmd, snacks_terminal_opts)
+				end,
 			},
 			lsp = {
 				enabled = true,
