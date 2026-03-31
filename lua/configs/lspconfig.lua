@@ -10,28 +10,198 @@ vim.api.nvim_create_user_command("ToggleFormatOnSave", function()
 	vim.notify("Format on save " .. status, vim.log.levels.INFO)
 end, { desc = "Toggle format on save" })
 
--- Helper function to add build flags for gopls
-local function add_build_flags()
-	local mappings = {
-		-- Edit these to configure specific build tags if the project matches the following dir pattern
-		-- { pattern = "test", tags = "some_tag" },
-	}
-	local tag_string = ""
-	local cwd = vim.loop.cwd()
+-- Known GOOS values (not custom build tags)
+local known_goos = {
+	aix = true,
+	android = true,
+	darwin = true,
+	dragonfly = true,
+	freebsd = true,
+	illumos = true,
+	ios = true,
+	js = true,
+	linux = true,
+	netbsd = true,
+	openbsd = true,
+	plan9 = true,
+	solaris = true,
+	wasip1 = true,
+	wasip2 = true,
+	windows = true,
+	zos = true,
+}
 
-	for _, mapping in pairs(mappings) do
-		if cwd:match(mapping.pattern) then
-			tag_string = tag_string .. mapping.tags .. " "
+-- Known GOARCH values (not custom build tags)
+local known_goarch = {
+	["386"] = true,
+	amd64 = true,
+	arm = true,
+	arm64 = true,
+	loong64 = true,
+	mips = true,
+	mips64 = true,
+	mips64le = true,
+	mipsle = true,
+	ppc64 = true,
+	ppc64le = true,
+	riscv64 = true,
+	s390x = true,
+	wasm = true,
+}
+
+-- Tags to always exclude from detection
+local excluded_tags = {
+	ignore = true,
+	cgo = true,
+}
+
+--- Check if a tag identifier is a custom build tag (not a platform/arch/version)
+--- @param tag string
+--- @return boolean
+local function is_custom_tag(tag)
+	if known_goos[tag] or known_goarch[tag] or excluded_tags[tag] then
+		return false
+	end
+	-- Filter Go version constraints like go1.21
+	if tag:match("^go%d") then
+		return false
+	end
+	return true
+end
+
+--- Extract custom build tags from lines of a Go file header
+--- @param lines string[]
+--- @return table<string, boolean> set of custom tag names
+local function extract_tags_from_lines(lines)
+	local tags = {}
+	for _, line in ipairs(lines) do
+		-- Stop at package clause (nothing after this is a build directive)
+		if line:match("^package%s+") then
+			break
+		end
+		-- New syntax: //go:build <expression>
+		local expr = line:match("^//go:build%s+(.+)$")
+		if expr then
+			for tag in expr:gmatch("[%w_]+") do
+				if is_custom_tag(tag) then
+					tags[tag] = true
+				end
+			end
+		end
+		-- Old syntax: // +build <tags>
+		local build_expr = line:match("^//%s+%+build%s+(.+)$")
+		if build_expr then
+			for tag in build_expr:gmatch("[%w_]+") do
+				if is_custom_tag(tag) then
+					tags[tag] = true
+				end
+			end
 		end
 	end
-	if tag_string == "" then
-		return {}
-	end
-	tag_string = "-tags=" .. tag_string
+	return tags
+end
 
-	return {
-		buildFlags = { tag_string },
-	}
+--- Scan all Go files in the workspace for custom build tags.
+--- Uses git ls-files for speed in git repos, falls back to vim.fn.glob.
+--- @return string[] sorted list of unique custom build tag names
+local function scan_go_build_tags()
+	local files = {}
+	local cwd = vim.uv.cwd() or vim.loop.cwd()
+
+	-- Try git ls-files first (fast, respects .gitignore)
+	local git_result = vim.fn.systemlist("git ls-files '*.go' 2>/dev/null")
+	if vim.v.shell_error == 0 and #git_result > 0 then
+		files = git_result
+	else
+		-- Fallback: recursive glob (slower in large repos)
+		local glob_results = vim.fn.glob(cwd .. "/**/*.go", false, true)
+		for _, f in ipairs(glob_results) do
+			-- Make paths relative for consistency
+			files[#files + 1] = f:sub(#cwd + 2)
+		end
+	end
+
+	local all_tags = {}
+
+	for _, rel_path in ipairs(files) do
+		local abs_path = cwd .. "/" .. rel_path
+		-- Read only the first 20 lines (build tags must appear before the package clause)
+		local ok, lines = pcall(function()
+			local f = io.open(abs_path, "r")
+			if not f then
+				return {}
+			end
+			local result = {}
+			for i = 1, 20 do
+				local line = f:read("*l")
+				if not line then
+					break
+				end
+				result[i] = line
+			end
+			f:close()
+			return result
+		end)
+
+		if ok and lines and #lines > 0 then
+			local file_tags = extract_tags_from_lines(lines)
+			for tag in pairs(file_tags) do
+				all_tags[tag] = true
+			end
+		end
+	end
+
+	-- Return sorted list
+	local result = vim.tbl_keys(all_tags)
+	table.sort(result)
+	return result
+end
+
+--- Apply build tags to all running gopls clients dynamically (no restart needed).
+--- @param tags string[] list of tag names to enable
+local function apply_gopls_build_tags(tags)
+	if #tags == 0 then
+		return
+	end
+
+	local flag = "-tags=" .. table.concat(tags, ",")
+	local clients = vim.lsp.get_clients({ name = "gopls" })
+
+	for _, client in ipairs(clients) do
+		client.settings = vim.tbl_deep_extend("force", client.settings or {}, {
+			gopls = {
+				buildFlags = { flag },
+			},
+		})
+		-- Notify gopls that config changed. gopls will pull new settings
+		-- via workspace/configuration request.
+		client:notify("workspace/didChangeConfiguration", {
+			settings = client.settings,
+		})
+	end
+end
+
+-- Track whether we've already scanned for this session to avoid repeat scans
+-- on every buffer attach.
+local gopls_tags_applied = false
+
+--- Scan the workspace for Go build tags and apply them to gopls.
+--- @param opts? { force?: boolean, silent?: boolean }
+local function refresh_gopls_tags(opts)
+	opts = opts or {}
+	if gopls_tags_applied and not opts.force then
+		return
+	end
+
+	local tags = scan_go_build_tags()
+	gopls_tags_applied = true
+
+	if #tags > 0 then
+		apply_gopls_build_tags(tags)
+		if not opts.silent then
+			vim.notify("gopls: auto-detected build tags: " .. table.concat(tags, ", "), vim.log.levels.INFO)
+		end
+	end
 end
 
 -- Custom LSP server configurations
@@ -58,7 +228,10 @@ local lsp_configs = {
 	},
 	gopls = {
 		settings = {
-			gopls = vim.tbl_deep_extend("force", add_build_flags(), {
+			gopls = {
+				-- Build tags are auto-detected and applied dynamically on LspAttach.
+				-- Use :GoplsRefreshTags to re-scan, :GoplsBuildTags to view active tags.
+
 				-- Allow gopls to analyze dependencies
 				directoryFilters = {
 					"-**/node_modules",
@@ -92,7 +265,7 @@ local lsp_configs = {
 					parameterNames = false,
 					rangeVariableTypes = false,
 				},
-			}),
+			},
 		},
 	},
 	clangd = {
@@ -123,6 +296,27 @@ require("mason-lspconfig").setup({
 	},
 })
 
+-- User commands for gopls build tag management
+vim.api.nvim_create_user_command("GoplsRefreshTags", function()
+	refresh_gopls_tags({ force = true })
+end, { desc = "Re-scan workspace for Go build tags and apply to gopls" })
+
+vim.api.nvim_create_user_command("GoplsBuildTags", function()
+	local clients = vim.lsp.get_clients({ name = "gopls" })
+	if #clients == 0 then
+		vim.notify("gopls is not running", vim.log.levels.WARN)
+		return
+	end
+	for _, client in ipairs(clients) do
+		local flags = (client.settings.gopls or {}).buildFlags or {}
+		if #flags == 0 then
+			vim.notify("gopls: no build tags active", vim.log.levels.INFO)
+		else
+			vim.notify("gopls build flags: " .. table.concat(flags, " "), vim.log.levels.INFO)
+		end
+	end
+end, { desc = "Show currently active gopls build tags" })
+
 -- Setup LSP keybindings with Telescope integration (LazyVim-style)
 vim.api.nvim_create_autocmd("LspAttach", {
 	group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
@@ -130,8 +324,16 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		local bufnr = args.buf
 		local client = vim.lsp.get_client_by_id(args.data.client_id)
 
+		-- Auto-detect and apply build tags when gopls attaches
+		if client and client.name == "gopls" then
+			-- Schedule to run after gopls is fully initialized
+			vim.schedule(function()
+				refresh_gopls_tags()
+			end)
+		end
+
 		-- Enable format on save if LSP supports formatting
-		if client.supports_method("textDocument/formatting") then
+		if client:supports_method("textDocument/formatting") then
 			vim.api.nvim_create_autocmd("BufWritePre", {
 				buffer = bufnr,
 				callback = function()
