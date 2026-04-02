@@ -16,7 +16,7 @@ return {
 		{ "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude Model" },
 		{ "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add Current Buffer to Claude" },
 		{
-			"<leader>aS",
+			"<leader>av",
 			"<cmd>ClaudeCodeSend<cr>",
 			mode = "v",
 			desc = "Send Selection to Claude",
@@ -35,6 +35,8 @@ return {
 		{ "<leader>aD", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny Claude Diff" },
 	},
 	opts = {
+		terminal_cmd = "claude --allow-dangerously-skip-permissions",
+
 		-- Server Configuration
 		port_range = { min = 10000, max = 65535 },
 		auto_start = true,
