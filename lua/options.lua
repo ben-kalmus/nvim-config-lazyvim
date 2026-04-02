@@ -19,9 +19,17 @@ opt.shiftwidth = 4 -- Size of an indent
 opt.softtabstop = 4 -- Number of spaces tab key inserts
 opt.expandtab = true -- Use spaces instead of tabs
 
--- Folding with treesitter
+-- Folding with treesitter (skipped for large files to avoid parser overhead)
+function _G.FoldExpr()
+	local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(0))
+	if ok and stats and stats.size > 1024 * 1024 then
+		return "0"
+	end
+	return vim.treesitter.foldexpr()
+end
+
 opt.foldmethod = "expr"
-opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+opt.foldexpr = "v:lua.FoldExpr()"
 opt.foldlevel = 99 -- Open all folds by default
 opt.foldlevelstart = 99 -- Open all folds when opening a file
 opt.foldenable = true

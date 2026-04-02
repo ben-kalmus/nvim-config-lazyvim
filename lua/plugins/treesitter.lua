@@ -1,3 +1,8 @@
+local function is_large_file(buf)
+	local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
+	return ok and stats and stats.size > 1024 * 1024 -- 1MB
+end
+
 return {
 	"nvim-treesitter/nvim-treesitter",
 	build = ":TSUpdate",
@@ -25,10 +30,15 @@ return {
 		auto_install = true,
 		highlight = {
 			enable = true,
-			-- additional_vim_regex_highlighting = false,
+			disable = function(_, buf)
+				return is_large_file(buf)
+			end,
 		},
 		indent = {
 			enable = true,
+			disable = function(_, buf)
+				return is_large_file(buf)
+			end,
 		},
 	},
 }

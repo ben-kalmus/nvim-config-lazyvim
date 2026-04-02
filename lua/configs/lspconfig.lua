@@ -317,12 +317,23 @@ vim.api.nvim_create_user_command("GoplsBuildTags", function()
 	end
 end, { desc = "Show currently active gopls build tags" })
 
+local function is_large_file(bufnr)
+	local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(bufnr))
+	return ok and stats and stats.size > 1024 * 1024 -- 1MB
+end
+
 -- Setup LSP keybindings with Telescope integration (LazyVim-style)
 vim.api.nvim_create_autocmd("LspAttach", {
 	group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
 	callback = function(args)
 		local bufnr = args.buf
 		local client = vim.lsp.get_client_by_id(args.data.client_id)
+
+		-- Skip LSP features entirely for large files
+		if is_large_file(bufnr) then
+			vim.lsp.buf_detach_client(bufnr, args.data.client_id)
+			return
+		end
 
 		-- Auto-detect and apply build tags when gopls attaches
 		if client and client.name == "gopls" then
@@ -377,6 +388,14 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		map("n", "<leader>cd", vim.diagnostic.open_float, "Line Diagnostics")
 		map("n", "]d", vim.diagnostic.goto_next, "Next Diagnostic")
 		map("n", "[d", vim.diagnostic.goto_prev, "Prev Diagnostic")
+
+		-- Illuminate reference navigation (buffer-local to override ftplugin's ]] / [[)
+		vim.keymap.set("n", "]]", function()
+			require("illuminate").goto_next_reference()
+		end, { buffer = bufnr, desc = "Next Reference" })
+		vim.keymap.set("n", "[[", function()
+			require("illuminate").goto_prev_reference()
+		end, { buffer = bufnr, desc = "Prev Reference" })
 	end,
 })
 
