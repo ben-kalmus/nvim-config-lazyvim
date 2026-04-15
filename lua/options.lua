@@ -6,6 +6,7 @@ require("nvchad.options")
 -- o.cursorlineopt ='both' -- to enable cursorline!
 
 local opt = vim.opt
+opt.modeline = false
 opt.relativenumber = true
 
 opt.wrap = false
