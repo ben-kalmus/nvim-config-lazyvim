@@ -1,4 +1,4 @@
-local opencode_cmd = "opencode --port"
+local opencode_cmd = "env -u TMUX opencode --port"
 
 local snacks_terminal_opts = {
 	win = {
