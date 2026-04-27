@@ -1,4 +1,4 @@
-local HOME = "/home/benkalmus" --vim.fn.expand("~")
+local HOME = vim.fn.expand("~")
 return {
 	"mfussenegger/nvim-lint",
 	optional = true,

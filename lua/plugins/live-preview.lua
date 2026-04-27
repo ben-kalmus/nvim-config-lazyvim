@@ -10,7 +10,7 @@ return {
 	"brianhuster/live-preview.nvim",
 	event = "VeryLazy",
 	dependencies = {
-		"ibhagwan/fzf-lua",
+		"folke/snacks.nvim",
 	},
 	keys = {
 		{
@@ -43,7 +43,7 @@ return {
 			browser = "default", -- 'default' or command like 'firefox'
 			dynamic_root = false, -- false = use cwd, true = use parent dir of file
 			sync_scroll = true, -- Sync browser scroll with nvim scroll
-			picker = "fzf", -- 'telescope', 'fzf', 'mini.pick', 'snacks', or vim.ui.select
+			picker = "snacks", -- 'telescope', 'fzf', 'mini.pick', 'snacks', or vim.ui.select
 			address = "127.0.0.1", -- Server bind address
 		})
 	end,

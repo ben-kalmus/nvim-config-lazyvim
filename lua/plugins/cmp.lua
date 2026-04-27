@@ -1,8 +1,9 @@
-local cmp = require("cmp")
 return {
     "hrsh7th/nvim-cmp",
     enabled = true,
-    opts = {
+    opts = function(_, opts)
+        local cmp = require("cmp")
+        return vim.tbl_deep_extend("force", opts or {}, {
         completion = {
             completeopt = "menu,menuone,noselect,noinsert,popup",
         },
@@ -69,5 +70,6 @@ return {
         --         cmp.config.compare.order,
         --     },
         -- },
-    },
+        })
+    end,
 }
