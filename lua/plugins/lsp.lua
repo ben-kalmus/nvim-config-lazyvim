@@ -313,12 +313,8 @@ return {
           map("n", "]d", vim.diagnostic.goto_next, "Next Diagnostic")
           map("n", "[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
 
-          vim.keymap.set("n", "]]", function()
-            require("illuminate").goto_next_reference()
-          end, { buffer = bufnr, desc = "Next Reference" })
-          vim.keymap.set("n", "[[", function()
-            require("illuminate").goto_prev_reference()
-          end, { buffer = bufnr, desc = "Previous Reference" })
+          -- [[/]] are handled by Snacks.words via LazyVim's LSP keymaps
+          -- (requires documentHighlight capability; falls back to treesitter motions)
         end,
       })
 

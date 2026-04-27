@@ -11,5 +11,6 @@ return {
 			enabled = true,
 			timeout = 3000,
 		},
+		scroll = { enabled = false },
 	},
 }
