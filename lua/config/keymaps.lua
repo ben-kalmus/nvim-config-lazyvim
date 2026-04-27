@@ -102,29 +102,6 @@ map({ "n", "v" }, "<leader>gn", LazyVim.pick("git_log_line"), { desc = "Git Line
 map({ "n", "v" }, "<leader>gs", LazyVim.pick("git_status"), { desc = "Git Status" })
 map({ "n", "v" }, "<leader>gC", LazyVim.pick("git_log_file"), { desc = "Git Buffer Commit Log" })
 
--- Git worktrees.
-map({ "n", "v" }, "<leader>gwc", function()
-  vim.ui.input({ prompt = "Enter worktree name: " }, function(input)
-    if input and input ~= "" then
-      require("git-worktree").create_worktree(input)
-    end
-  end)
-end, { desc = "Create Git Worktree" })
-map({ "n", "v" }, "<leader>gws", function()
-  vim.ui.input({ prompt = "Switch to worktree: " }, function(input)
-    if input and input ~= "" then
-      require("git-worktree").switch_worktree(input)
-    end
-  end)
-end, { desc = "Switch to Worktree" })
-map({ "n", "v" }, "<leader>gwd", function()
-  vim.ui.input({ prompt = "Delete worktree: " }, function(input)
-    if input and input ~= "" then
-      require("git-worktree").delete_worktree(input)
-    end
-  end)
-end, { desc = "Delete Git Worktree" })
-
 -- Diffview.
 map("n", "<leader>DO", "<cmd>DiffviewOpen<cr>", { desc = "Open Diffview" })
 map("n", "<leader>DD", "<cmd>DiffviewClose<cr>", { desc = "Close Diffview" })
