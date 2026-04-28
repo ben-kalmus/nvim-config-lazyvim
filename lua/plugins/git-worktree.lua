@@ -1,9 +1,20 @@
 local function worktree_repo_root()
-  local root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
-  if vim.v.shell_error ~= 0 then
+  -- Use --git-common-dir so this works correctly from inside a worktree.
+  -- --show-toplevel returns the worktree's own root, not the main repo root.
+  local common_dir = vim.fn.systemlist("git rev-parse --git-common-dir")[1]
+  if vim.v.shell_error ~= 0 or not common_dir then
     return nil
   end
-  return root
+  -- common_dir is either ".git" (relative, when in main repo) or an absolute path
+  if not common_dir:match("^/") then
+    common_dir = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+    if vim.v.shell_error ~= 0 then
+      return nil
+    end
+    return common_dir
+  end
+  -- strip trailing /.git
+  return common_dir:gsub("/%.git$", "")
 end
 
 local function worktree_list()
@@ -34,13 +45,55 @@ local function worktree_list()
   return worktrees
 end
 
+-- List branches that are NOT currently checked out by any worktree.
+-- Returns items: { branch, is_remote, display }
+-- Local branches first, then remote-only branches.
+local function list_available_branches()
+  local in_use = {}
+  for _, wt in ipairs(worktree_list()) do
+    if wt.branch then
+      in_use[wt.branch] = true
+    end
+  end
+
+  local locals = vim.fn.systemlist({ "git", "branch", "--format=%(refname:short)" })
+  if vim.v.shell_error ~= 0 then
+    return {}
+  end
+  local local_set = {}
+  local items = {}
+  for _, b in ipairs(locals) do
+    if b ~= "" and not in_use[b] then
+      local_set[b] = true
+      table.insert(items, { branch = b, is_remote = false, display = "  " .. b, text = b })
+    end
+  end
+
+  local remotes = vim.fn.systemlist({ "git", "branch", "-r", "--format=%(refname:short)" })
+  if vim.v.shell_error == 0 then
+    for _, b in ipairs(remotes) do
+      -- skip pointers like "origin/HEAD"
+      if b ~= "" and not b:match("/HEAD$") then
+        -- strip first path segment (remote name) to get logical local name
+        local logical = b:gsub("^[^/]+/", "")
+        if not local_set[logical] then
+          table.insert(items, { branch = b, is_remote = true, display = "  " .. b .. "  [remote]", text = b })
+        end
+      end
+    end
+  end
+
+  return items
+end
+
 return {
   "polarmutex/git-worktree.nvim",
   version = "^2",
   dependencies = { "nvim-lua/plenary.nvim" },
   keys = {
     { "<leader>gwl", desc = "List/Switch Worktree" },
-    { "<leader>gwc", desc = "Create Worktree" },
+    { "<leader>gwc", desc = "Create Worktree From Branch" },
+    { "<leader>gwn", desc = "Create Worktree With New Branch" },
     { "<leader>gwd", desc = "Delete Worktree" },
   },
   config = function()
@@ -51,10 +104,12 @@ return {
       autopush = false,
     }
     local Hooks = require("git-worktree.hooks")
-    Hooks.register(
-      Hooks.type.SWITCH,
-      Hooks.builtins.update_current_buffer_on_switch
-    )
+    Hooks.register(Hooks.type.SWITCH, Hooks.builtins.update_current_buffer_on_switch)
+    -- Fires after the async create job actually completes (worktree.lua:144).
+    -- Replaces the old fire-immediately notification that lied about success.
+    Hooks.register(Hooks.type.CREATE, function(path, branch)
+      vim.notify("Worktree created: " .. path .. " (" .. (branch or "?") .. ")", vim.log.levels.INFO)
+    end)
 
     -- Switch worktree via Snacks picker
     vim.keymap.set("n", "<leader>gwl", function()
@@ -84,23 +139,89 @@ return {
       })
     end, { desc = "List/Switch Worktree" })
 
-    -- Create worktree — branch name drives the folder name (slashes → dashes)
+    -- Create worktree from EXISTING branch (picker, no typing).
+    -- Local branches: use plugin's create_worktree (runs `git worktree add <path> <branch>`).
+    -- Remote-only branches: bypass plugin to avoid its `local/` prefix; run
+    -- `git worktree add --track -b <local_name> <path> <remote_ref>` directly,
+    -- then call switch_worktree to fire the SWITCH hook.
     vim.keymap.set("n", "<leader>gwc", function()
       local root = worktree_repo_root()
       if not root then
         vim.notify("Not inside a git repo", vim.log.levels.ERROR)
         return
       end
-      Snacks.input({ prompt = "Branch name: " }, function(branch)
+      local items = list_available_branches()
+      if #items == 0 then
+        vim.notify("No branches available (all checked out by worktrees)", vim.log.levels.WARN)
+        return
+      end
+      Snacks.picker({
+        title = "Create Worktree From Branch",
+        items = items,
+        format = function(item)
+          return { { item.display } }
+        end,
+        confirm = function(picker, item)
+          picker:close()
+          local logical_name = item.is_remote and item.branch:gsub("^[^/]+/", "") or item.branch
+          local folder = logical_name:gsub("/", "-")
+          local path = root .. "/.worktrees/" .. folder
+          if vim.uv.fs_stat(path) then
+            vim.notify("Worktree path already exists: " .. path, vim.log.levels.ERROR)
+            return
+          end
+          if item.is_remote then
+            local cmd = { "git", "worktree", "add", "--track", "-b", logical_name, path, item.branch }
+            local out = vim.fn.systemlist(cmd)
+            if vim.v.shell_error ~= 0 then
+              vim.notify("git worktree add failed:\n" .. table.concat(out, "\n"), vim.log.levels.ERROR)
+              return
+            end
+            vim.notify("Worktree created: " .. path .. " (" .. logical_name .. " → " .. item.branch .. ")", vim.log.levels.INFO)
+            vim.schedule(function()
+              require("git-worktree").switch_worktree(path)
+            end)
+          else
+            require("git-worktree").create_worktree(path, item.branch)
+            vim.schedule(function()
+              require("git-worktree").switch_worktree(path)
+            end)
+          end
+        end,
+      })
+    end, { desc = "Create Worktree From Branch" })
+
+    -- Create worktree with a NEW branch off HEAD.
+    -- Pre-fills with current branch (typically you'll change it).
+    vim.keymap.set("n", "<leader>gwn", function()
+      local root = worktree_repo_root()
+      if not root then
+        vim.notify("Not inside a git repo", vim.log.levels.ERROR)
+        return
+      end
+      local current_branch = vim.fn.systemlist("git branch --show-current")[1] or ""
+      Snacks.input({ prompt = "New branch name: ", default = current_branch }, function(branch)
         if not branch or branch == "" then
+          return
+        end
+        -- Pre-flight: if branch already exists, redirect user to <leader>gwc.
+        vim.fn.system({ "git", "rev-parse", "--verify", "--quiet", "refs/heads/" .. branch })
+        if vim.v.shell_error == 0 then
+          vim.notify("Branch '" .. branch .. "' already exists. Use <leader>gwc to pick it.", vim.log.levels.ERROR)
           return
         end
         local folder = branch:gsub("/", "-")
         local path = root .. "/.worktrees/" .. folder
+        if vim.uv.fs_stat(path) then
+          vim.notify("Worktree path already exists: " .. path, vim.log.levels.ERROR)
+          return
+        end
         require("git-worktree").create_worktree(path, branch)
-        vim.notify("Worktree created: " .. path .. " (" .. branch .. ")", vim.log.levels.INFO)
+        vim.schedule(function()
+          require("git-worktree").switch_worktree(path)
+        end)
       end)
-    end, { desc = "Create Worktree" })
+    end, { desc = "Create Worktree With New Branch" })
 
     -- Delete worktree via Snacks picker (excludes main worktree)
     vim.keymap.set("n", "<leader>gwd", function()
