@@ -90,6 +90,16 @@ return {
   "polarmutex/git-worktree.nvim",
   version = "^2",
   dependencies = { "nvim-lua/plenary.nvim" },
+  -- Set config before the plugin module is first required so that config.lua
+  -- picks it up when it evaluates vim.g.git_worktree at module load time.
+  init = function()
+    vim.g.git_worktree = {
+      change_directory_command = "cd",
+      update_on_change = true,
+      clearjumps_on_change = true,
+      autopush = false,
+    }
+  end,
   keys = {
     { "<leader>gwl", desc = "List/Switch Worktree" },
     { "<leader>gwc", desc = "Create Worktree From Branch" },
@@ -97,12 +107,6 @@ return {
     { "<leader>gwd", desc = "Delete Worktree" },
   },
   config = function()
-    vim.g.git_worktree = {
-      change_directory_command = "tcd",
-      update_on_change = true,
-      clearjumps_on_change = true,
-      autopush = false,
-    }
     local Hooks = require("git-worktree.hooks")
     Hooks.register(Hooks.type.SWITCH, Hooks.builtins.update_current_buffer_on_switch)
     -- Fires after the async create job actually completes (worktree.lua:144).
@@ -170,23 +174,29 @@ return {
             vim.notify("Worktree path already exists: " .. path, vim.log.levels.ERROR)
             return
           end
+          -- Bypass the plugin's create_worktree for all cases: the plugin's
+          -- remote-branch detection rewrites local branch names and its
+          -- has_worktree check can produce false "already in use" errors.
+          -- Run git directly for both local and remote branches.
+          local cmd
           if item.is_remote then
-            local cmd = { "git", "worktree", "add", "--track", "-b", logical_name, path, item.branch }
-            local out = vim.fn.systemlist(cmd)
-            if vim.v.shell_error ~= 0 then
-              vim.notify("git worktree add failed:\n" .. table.concat(out, "\n"), vim.log.levels.ERROR)
-              return
-            end
-            vim.notify("Worktree created: " .. path .. " (" .. logical_name .. " → " .. item.branch .. ")", vim.log.levels.INFO)
-            vim.schedule(function()
-              require("git-worktree").switch_worktree(path)
-            end)
+            cmd = { "git", "worktree", "add", "--track", "-b", logical_name, path, item.branch }
           else
-            require("git-worktree").create_worktree(path, item.branch)
-            vim.schedule(function()
-              require("git-worktree").switch_worktree(path)
-            end)
+            cmd = { "git", "worktree", "add", path, item.branch }
           end
+          local out = vim.fn.systemlist(cmd)
+          if vim.v.shell_error ~= 0 then
+            vim.notify("git worktree add failed:\n" .. table.concat(out, "\n"), vim.log.levels.ERROR)
+            return
+          end
+          if item.is_remote then
+            vim.notify("Worktree created: " .. path .. " (" .. logical_name .. " → " .. item.branch .. ")", vim.log.levels.INFO)
+          else
+            vim.notify("Worktree created: " .. path .. " (" .. item.branch .. ")", vim.log.levels.INFO)
+          end
+          vim.schedule(function()
+            require("git-worktree").switch_worktree(path)
+          end)
         end,
       })
     end, { desc = "Create Worktree From Branch" })

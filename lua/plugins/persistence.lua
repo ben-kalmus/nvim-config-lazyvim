@@ -12,6 +12,19 @@ return {
         -- set to false to save on every VimLeavePre
         save_empty = false,
     },
+    -- Auto-restore session for the cwd when Neovim starts with no file args.
+    init = function()
+        vim.api.nvim_create_autocmd("VimEnter", {
+            group = vim.api.nvim_create_augroup("persistence_auto_restore", { clear = true }),
+            nested = true,
+            callback = function()
+                -- Only restore if nvim was opened without file arguments.
+                if vim.fn.argc() == 0 then
+                    require("persistence").load()
+                end
+            end,
+        })
+    end,
     keys = {
         {
             "<leader>qs",

@@ -12,5 +12,6 @@ return {
 			timeout = 3000,
 		},
 		scroll = { enabled = false },
+		dashboard = { enabled = false },
 	},
 }
