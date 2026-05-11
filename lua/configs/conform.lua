@@ -2,6 +2,8 @@ local options = {
   formatters_by_ft = {
     lua = { "stylua" },
     python = { "ruff_format" },
+    json = { "biome" },
+    jsonc = { "biome" },
     -- css = { "prettier" },
     -- html = { "prettier" },
   },
