@@ -13,5 +13,6 @@ return {
 		},
 		scroll = { enabled = false },
 		dashboard = { enabled = false },
+		bigfile = { line_length = 100000 },
 	},
 }
