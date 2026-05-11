@@ -160,6 +160,75 @@ local function is_large_file(bufnr)
   return ok and stats and stats.size > 1024 * 1024
 end
 
+-- Parse octo review buffer URI to extract the real file path
+-- Format: octo://<owner>/<repo>/review/<id>/file/<SIDE>/<path>
+-- Only bridges RIGHT side (PR head), returns nil for LEFT or non-review URIs
+local function octo_uri_to_real_path(bufname)
+  local side, path = bufname:match("^octo://[^/]+/[^/]+/review/[^/]+/file/(%u+)/(.+)$")
+  if not side or side ~= "RIGHT" or not path then
+    return nil
+  end
+  local root = vim.fn.systemlist({ "git", "rev-parse", "--show-toplevel" })[1]
+  if vim.v.shell_error ~= 0 or not root then
+    return nil
+  end
+  return root .. "/" .. path
+end
+
+-- Bridge LSP hover request from octo buffer to real file
+local function bridge_octo_hover()
+  local bufname = vim.api.nvim_buf_get_name(0)
+  local real_path = octo_uri_to_real_path(bufname)
+  if not real_path then
+    return false
+  end
+
+  local real_bufnr = vim.fn.bufadd(real_path)
+  vim.fn.bufload(real_bufnr)
+
+  -- Wait briefly for LSP to attach to real buffer
+  vim.wait(2000, function()
+    return #vim.lsp.get_clients({ bufnr = real_bufnr }) > 0
+  end)
+
+  local clients = vim.lsp.get_clients({ bufnr = real_bufnr })
+  if #clients == 0 then
+    vim.notify("No LSP client for: " .. real_path, vim.log.levels.WARN)
+    return false
+  end
+
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  local params = vim.lsp.util.make_text_document_params(real_bufnr)
+  params.position = { line = row - 1, character = col }
+
+  local handler = vim.lsp.handlers.hover
+  for _, client in ipairs(clients) do
+    client.request("textDocument/hover", params, function(err, result)
+      if err or not result or not result.contents then
+        return
+      end
+      local conf = {}
+      conf.border = "rounded"
+      conf.focusable = true
+      conf.stylize_markdown = false
+      local bufnr, winnr = vim.lsp.util.open_floating_preview(
+        vim.lsp.util.convert_input_to_markdown_lines(result.contents, {}),
+        "markdown",
+        conf
+      )
+      if bufnr and winnr then
+        vim.bo[bufnr].filetype = ""
+        vim.bo[bufnr].syntax = "off"
+        vim.wo[winnr].conceallevel = 0
+        vim.wo[winnr].concealcursor = ""
+        vim.wo[winnr].wrap = true
+      end
+    end, "sync")
+    break
+  end
+  return true
+end
+
 return {
   {
     "neovim/nvim-lspconfig",
@@ -266,6 +335,13 @@ return {
         callback = function(args)
           local bufnr = args.buf
           local client = vim.lsp.get_client_by_id(args.data.client_id)
+          local bufname = vim.api.nvim_buf_get_name(bufnr)
+
+          -- Detach LSP from octo:// buffers (gopls rejects non-file URIs)
+          if bufname:match("^octo://") then
+            vim.lsp.buf_detach_client(bufnr, args.data.client_id)
+            return
+          end
 
           if is_large_file(bufnr) then
             vim.lsp.buf_detach_client(bufnr, args.data.client_id)
@@ -347,6 +423,19 @@ return {
 
         return bufnr, winnr
       end
+
+      -- Set up bridged LSP keymaps for octo review buffers
+      vim.api.nvim_create_autocmd("BufReadPost", {
+        pattern = "octo://*/review/*/file/RIGHT/*",
+        callback = function(args)
+          local bufnr = args.buf
+          vim.keymap.set("n", "K", function()
+            if not bridge_octo_hover() then
+              vim.notify("No hover available (not a bridged octo buffer)", vim.log.levels.WARN)
+            end
+          end, { buffer = bufnr, desc = "LSP Hover (bridged to real file)" })
+        end,
+      })
     end,
   },
 }
