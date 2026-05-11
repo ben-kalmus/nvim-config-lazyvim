@@ -302,14 +302,6 @@ return {
       })
     end,
     init = function()
-      vim.g.format_on_save = true
-
-      vim.api.nvim_create_user_command("ToggleFormatOnSave", function()
-        vim.g.format_on_save = not vim.g.format_on_save
-        local status = vim.g.format_on_save and "enabled" or "disabled"
-        vim.notify("Format on save " .. status, vim.log.levels.INFO)
-      end, { desc = "Toggle format on save" })
-
       vim.api.nvim_create_user_command("GoplsRefreshTags", function()
         refresh_gopls_tags({ force = true })
       end, { desc = "Re-scan workspace for Go build tags and apply to gopls" })
@@ -352,17 +344,6 @@ return {
             vim.schedule(function()
               refresh_gopls_tags()
             end)
-          end
-
-          if client and client:supports_method("textDocument/formatting") then
-            vim.api.nvim_create_autocmd("BufWritePre", {
-              buffer = bufnr,
-              callback = function()
-                if vim.g.format_on_save then
-                  vim.lsp.buf.format({ bufnr = bufnr })
-                end
-              end,
-            })
           end
 
           local function map(mode, lhs, rhs, desc)

@@ -4,7 +4,6 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 vim.g.lazyvim_picker = "snacks"
 vim.g.lazyvim_cmp = "nvim-cmp"
-vim.g.format_on_save = true
 
 local opt = vim.opt
 
