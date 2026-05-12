@@ -2,25 +2,20 @@ return {
     "folke/persistence.nvim",
     lazy = false,
     opts = {
-        -- Directory where session files are saved
         dir = vim.fn.expand(vim.fn.stdpath("state") .. "/sessions/"),
-        -- sessionoptions used for saving
-        options = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp", "folds" },
-        -- enable saving sessions on VimLeavePre
-        pre_save = nil,
-        -- disable saving the session by default, only save on explicit command
-        -- set to false to save on every VimLeavePre
-        save_empty = false,
+        need = 0, -- always save, even if only one buffer
+        branch = true,
     },
-    -- Auto-restore session for the cwd when Neovim starts with no file args.
     init = function()
+        -- Auto-restore session for the cwd when Neovim starts with no file args.
         vim.api.nvim_create_autocmd("VimEnter", {
             group = vim.api.nvim_create_augroup("persistence_auto_restore", { clear = true }),
-            nested = true,
             callback = function()
-                -- Only restore if nvim was opened without file arguments.
                 if vim.fn.argc() == 0 then
-                    require("persistence").load()
+                    -- Defer to allow lazy loading to complete and LSP to be ready.
+                    vim.schedule(function()
+                        require("persistence").load()
+                    end)
                 end
             end,
         })
