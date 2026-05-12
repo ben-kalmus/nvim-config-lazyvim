@@ -65,7 +65,7 @@ local function list_available_branches()
   for _, b in ipairs(locals) do
     if b ~= "" and not in_use[b] then
       local_set[b] = true
-      table.insert(items, { branch = b, is_remote = false, display = "  " .. b, text = b })
+      table.insert(items, { branch = b, is_remote = false, display = "  " .. b .. "  [local]", text = b })
     end
   end
 
@@ -162,6 +162,9 @@ return {
       Snacks.picker({
         title = "Create Worktree From Branch",
         items = items,
+        -- is_remote:desc puts locals (false→1) before remotes (true→0) regardless
+        -- of filter input. Without this, the ~3000 remotes drown out the locals.
+        sort = { fields = { "is_remote:desc", "score:desc", "#text", "idx" } },
         format = function(item)
           return { { item.display } }
         end,
