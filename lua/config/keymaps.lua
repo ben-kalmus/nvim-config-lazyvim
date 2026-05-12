@@ -160,23 +160,10 @@ end, { desc = "Set Log Point" })
 map({ "n", "v" }, "<leader>wn", "<cmd>tabnew<cr>", { desc = "Create New Tab" })
 map({ "n", "v" }, "<leader>wc", "<cmd>tabclose<cr>", { desc = "Close Current Tab" })
 map("n", "<leader>bn", "<cmd>enew<cr>", { desc = "New Buffer" })
--- Scrub jumplist entries for a buffer before deleting it, so Ctrl-o/Ctrl-i
--- don't reopen the deleted buffer. Mirrors what NvChad's close_buffer did.
-local function scrub_jumplist(bufnr)
-  local jumplist = vim.fn.getjumplist()[1]
-  local filtered = vim.tbl_filter(function(entry)
-    return entry.bufnr ~= bufnr
-  end, jumplist)
-  vim.fn.setjumplist(filtered, "r")
-end
-
 map("n", "<leader>bd", function()
-  scrub_jumplist(vim.api.nvim_get_current_buf())
-  require("mini.bufremove").delete(0, false)
+  Snacks.bufdelete()
 end, { desc = "Delete Buffer" })
-
 map("n", "<leader>bD", function()
-  scrub_jumplist(vim.api.nvim_get_current_buf())
   Snacks.bufdelete({ force = true })
 end, { desc = "Delete Buffer Force" })
 map("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })

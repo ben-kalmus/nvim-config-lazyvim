@@ -1,6 +1,6 @@
 return {
     "folke/persistence.nvim",
-    event = "BufReadPre",
+    lazy = false,
     opts = {
         -- Directory where session files are saved
         dir = vim.fn.expand(vim.fn.stdpath("state") .. "/sessions/"),

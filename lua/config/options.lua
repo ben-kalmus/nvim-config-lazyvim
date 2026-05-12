@@ -34,3 +34,4 @@ opt.foldlevelstart = 99
 opt.foldenable = true
 
 opt.autoread = true
+opt.jumpoptions:append("clean")
