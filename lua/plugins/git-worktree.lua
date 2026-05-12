@@ -262,8 +262,43 @@ return {
         end,
         confirm = function(picker, item)
           picker:close()
-          require("git-worktree").delete_worktree(item.path)
-          vim.notify("Deleted worktree: " .. item.path, vim.log.levels.INFO)
+          -- Bypass the plugin: it runs the delete async, logs failures only
+          -- to its own log file, and never propagates errors back to the
+          -- caller. Run git directly so we can surface real errors.
+          local function do_delete(force)
+            local cmd = { "git", "worktree", "remove", item.path }
+            if force then
+              table.insert(cmd, "--force")
+            end
+            local out = vim.fn.systemlist(cmd)
+            if vim.v.shell_error ~= 0 then
+              return false, table.concat(out, "\n")
+            end
+            return true
+          end
+
+          local ok, err = do_delete(false)
+          if ok then
+            vim.notify("Deleted worktree: " .. item.path, vim.log.levels.INFO)
+            return
+          end
+
+          vim.schedule(function()
+            Snacks.input({
+              prompt = "git worktree remove failed:\n" .. err .. "\nRetry with --force? (y/N): ",
+            }, function(answer)
+              if answer and answer:lower():sub(1, 1) == "y" then
+                local ok2, err2 = do_delete(true)
+                if ok2 then
+                  vim.notify("Force-deleted worktree: " .. item.path, vim.log.levels.WARN)
+                else
+                  vim.notify("Force-delete failed:\n" .. err2, vim.log.levels.ERROR)
+                end
+              else
+                vim.notify("Worktree not deleted: " .. item.path, vim.log.levels.INFO)
+              end
+            end)
+          end)
         end,
       })
     end, { desc = "Delete Worktree" })
