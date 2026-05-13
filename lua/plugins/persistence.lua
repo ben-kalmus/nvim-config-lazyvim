@@ -6,6 +6,9 @@ return {
         need = 0, -- always save, even if only one buffer
         branch = true,
     },
+    config = function(_, opts)
+        require("persistence").setup(opts)
+    end,
     init = function()
         -- Auto-restore session for the cwd when Neovim starts with no file args.
         vim.api.nvim_create_autocmd("VimEnter", {
