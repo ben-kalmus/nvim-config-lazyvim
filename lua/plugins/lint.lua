@@ -7,8 +7,11 @@ return {
 		local lint = require("lint")
 
 		-- Configure linters by filetype
+		-- Go is intentionally omitted: golangci_lint_ls (auto-enabled by
+		-- mason-lspconfig) already runs golangci-lint and provides inline
+		-- diagnostics. Running both collides on golangci-lint's exclusive
+		-- module lock and produces "parallel golangci-lint is running".
 		lint.linters_by_ft = {
-			go = { "golangcilint" },
 			markdown = { "markdownlint-cli2" },
 		}
 
