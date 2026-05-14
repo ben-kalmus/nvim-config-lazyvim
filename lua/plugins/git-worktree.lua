@@ -115,6 +115,59 @@ return {
       vim.notify("Worktree created: " .. path .. " (" .. (branch or "?") .. ")", vim.log.levels.INFO)
     end)
 
+    -- On switch, wipe buffers and stop LSP clients rooted in the previous
+    -- worktree. Without this, every worktree visited in one session piles up
+    -- another gopls/golangci-lint/etc. instance plus stale buffers that keep
+    -- the old LSPs alive. Unsaved buffers are preserved.
+    local function is_under(file_path, root)
+      return file_path == root or vim.startswith(file_path, root .. "/")
+    end
+    Hooks.register(Hooks.type.SWITCH, function(new_path, prev_path)
+      if not prev_path or prev_path == "" or prev_path == new_path then
+        return
+      end
+
+      local wiped, kept_modified = 0, 0
+      for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].buftype == "" then
+          local name = vim.api.nvim_buf_get_name(buf)
+          if name ~= "" and is_under(name, prev_path) and not is_under(name, new_path) then
+            if vim.bo[buf].modified then
+              kept_modified = kept_modified + 1
+            else
+              pcall(vim.api.nvim_buf_delete, buf, { force = false, unload = false })
+              wiped = wiped + 1
+            end
+          end
+        end
+      end
+
+      local stopped = 0
+      for _, client in ipairs(vim.lsp.get_clients()) do
+        local root = client.root_dir or (client.config and client.config.root_dir)
+        if root and is_under(root, prev_path) and not is_under(root, new_path) then
+          pcall(function()
+            client:stop()
+          end)
+          stopped = stopped + 1
+        end
+      end
+
+      if wiped + stopped + kept_modified > 0 then
+        local parts = {}
+        if wiped > 0 then
+          table.insert(parts, wiped .. " buffer" .. (wiped == 1 and "" or "s"))
+        end
+        if stopped > 0 then
+          table.insert(parts, stopped .. " LSP client" .. (stopped == 1 and "" or "s"))
+        end
+        if kept_modified > 0 then
+          table.insert(parts, "kept " .. kept_modified .. " unsaved")
+        end
+        vim.notify("Worktree cleanup: " .. table.concat(parts, ", "), vim.log.levels.INFO)
+      end
+    end)
+
     -- Switch worktree via Snacks picker
     vim.keymap.set("n", "<leader>gwl", function()
       local worktrees = worktree_list()
