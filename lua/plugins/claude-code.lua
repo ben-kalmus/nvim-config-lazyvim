@@ -5,7 +5,12 @@ return {
 	},
 	keys = {
 		-- Main Claude Code commands
-		{ "<C-.>", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude Code" },
+		{
+			"<C-.>",
+			"<cmd>ClaudeCode<cr>",
+			desc = "Toggle Claude Code",
+			mode = { "n", "v", "t", "x" },
+		},
 		{ "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude Code" },
 		{ "<leader>af", "<cmd>ClaudeCodeFocus<cr>", desc = "Focus Claude Code" },
 		{ "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude Code" },
