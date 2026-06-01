@@ -40,7 +40,7 @@ return {
 		{ "<leader>aD", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny Claude Diff" },
 	},
 	opts = {
-		terminal_cmd = "claude --allow-dangerously-skip-permissions",
+		terminal_cmd = "env -u TMUX claude --allow-dangerously-skip-permissions",
 
 		-- Server Configuration
 		port_range = { min = 10000, max = 65535 },
