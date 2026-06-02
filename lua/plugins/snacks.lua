@@ -2,6 +2,12 @@ return {
 	"folke/snacks.nvim",
 	priority = 1000,
 	lazy = false,
+	-- Disable LazyVim's standalone <leader>gd (Snacks.picker.git_diff) so it
+	-- doesn't shadow the local <leader>gd* chord namespace for Diffview
+	-- (gdh/gdH/gdm/gdM/gdb/gdd/gdf in lua/config/keymaps.lua).
+	keys = {
+		{ "<leader>gd", false },
+	},
 	opts = {
 		input = { enabled = true },
 		picker = { enabled = true },
