@@ -22,13 +22,8 @@ return {
     vim.api.nvim_set_hl(0, "IlluminatedWordRead", { bg = "#3b4261" })
     vim.api.nvim_set_hl(0, "IlluminatedWordWrite", { bg = "#3b4261" })
 
-    -- Jump to next/previous reference
-    vim.keymap.set("n", "]]", function()
-      require("illuminate").goto_next_reference()
-    end, { desc = "Next Reference" })
-
-    vim.keymap.set("n", "[[", function()
-      require("illuminate").goto_prev_reference()
-    end, { desc = "Prev Reference" })
+    -- ]]/[[ reference jump handled by Snacks.words (LazyVim buffer-local map).
+    -- illuminate's goto_next_reference is async-debounced and disabled on
+    -- files over large_file_cutoff, so it was an unreliable no-op on big files.
   end,
 }
