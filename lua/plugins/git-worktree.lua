@@ -95,51 +95,49 @@ return {
   init = function()
     vim.g.git_worktree = {
       change_directory_command = "cd",
-      update_on_change = true,
+      -- false: do not let the plugin run `e .` on switch (would replace the
+      -- current buffer). We keep all tabs/buffers open across switches.
+      update_on_change = false,
       clearjumps_on_change = true,
       autopush = false,
     }
+    -- When true, switching worktrees stops LSP clients rooted in the previous
+    -- worktree (bounds gopls/golangci pileup). Toggle at runtime with
+    -- :WorktreeLspCleanupToggle or <leader>gwL.
+    if vim.g.worktree_lsp_cleanup == nil then
+      vim.g.worktree_lsp_cleanup = true
+    end
   end,
   keys = {
     { "<leader>gwl", desc = "List/Switch Worktree" },
     { "<leader>gwc", desc = "Create Worktree From Branch" },
     { "<leader>gwn", desc = "Create Worktree With New Branch" },
     { "<leader>gwd", desc = "Delete Worktree" },
+    { "<leader>gwL", "<cmd>WorktreeLspCleanupToggle<cr>", desc = "Toggle Worktree LSP Cleanup" },
   },
   config = function()
     local Hooks = require("git-worktree.hooks")
-    Hooks.register(Hooks.type.SWITCH, Hooks.builtins.update_current_buffer_on_switch)
     -- Fires after the async create job actually completes (worktree.lua:144).
     -- Replaces the old fire-immediately notification that lied about success.
     Hooks.register(Hooks.type.CREATE, function(path, branch)
       vim.notify("Worktree created: " .. path .. " (" .. (branch or "?") .. ")", vim.log.levels.INFO)
     end)
 
-    -- On switch, wipe buffers and stop LSP clients rooted in the previous
-    -- worktree. Without this, every worktree visited in one session piles up
-    -- another gopls/golangci-lint/etc. instance plus stale buffers that keep
-    -- the old LSPs alive. Unsaved buffers are preserved.
     local function is_under(file_path, root)
       return file_path == root or vim.startswith(file_path, root .. "/")
     end
+
+    -- On switch, optionally stop LSP clients rooted in the previous worktree.
+    -- Buffers and tabs are never touched (kept open across switches). Without
+    -- the LSP-stop, every worktree visited in one session piles up another
+    -- gopls/golangci-lint/etc. instance. Gated behind vim.g.worktree_lsp_cleanup
+    -- so it can be toggled at runtime.
     Hooks.register(Hooks.type.SWITCH, function(new_path, prev_path)
-      if not prev_path or prev_path == "" or prev_path == new_path then
+      if not vim.g.worktree_lsp_cleanup then
         return
       end
-
-      local wiped, kept_modified = 0, 0
-      for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-        if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].buftype == "" then
-          local name = vim.api.nvim_buf_get_name(buf)
-          if name ~= "" and is_under(name, prev_path) and not is_under(name, new_path) then
-            if vim.bo[buf].modified then
-              kept_modified = kept_modified + 1
-            else
-              pcall(vim.api.nvim_buf_delete, buf, { force = false, unload = false })
-              wiped = wiped + 1
-            end
-          end
-        end
+      if not prev_path or prev_path == "" or prev_path == new_path then
+        return
       end
 
       local stopped = 0
@@ -153,20 +151,21 @@ return {
         end
       end
 
-      if wiped + stopped + kept_modified > 0 then
-        local parts = {}
-        if wiped > 0 then
-          table.insert(parts, wiped .. " buffer" .. (wiped == 1 and "" or "s"))
-        end
-        if stopped > 0 then
-          table.insert(parts, stopped .. " LSP client" .. (stopped == 1 and "" or "s"))
-        end
-        if kept_modified > 0 then
-          table.insert(parts, "kept " .. kept_modified .. " unsaved")
-        end
-        vim.notify("Worktree cleanup: " .. table.concat(parts, ", "), vim.log.levels.INFO)
+      if stopped > 0 then
+        vim.notify(
+          "Worktree cleanup: stopped " .. stopped .. " LSP client" .. (stopped == 1 and "" or "s"),
+          vim.log.levels.INFO
+        )
       end
     end)
+
+    vim.api.nvim_create_user_command("WorktreeLspCleanupToggle", function()
+      vim.g.worktree_lsp_cleanup = not vim.g.worktree_lsp_cleanup
+      vim.notify(
+        "Worktree LSP cleanup " .. (vim.g.worktree_lsp_cleanup and "enabled" or "disabled"),
+        vim.log.levels.INFO
+      )
+    end, { desc = "Toggle stopping old-worktree LSP clients on switch" })
 
     -- Switch worktree via Snacks picker
     vim.keymap.set("n", "<leader>gwl", function()
@@ -250,8 +249,20 @@ return {
           else
             vim.notify("Worktree created: " .. path .. " (" .. item.branch .. ")", vim.log.levels.INFO)
           end
+          -- Open the new worktree in its own tab so existing tabs/buffers stay
+          -- put. switch_worktree still does the global cd (persistence keys
+          -- sessions on it), the new tab is the dedicated workspace.
+          vim.cmd("tabnew")
           vim.schedule(function()
             require("git-worktree").switch_worktree(path)
+            -- Replace the empty [No Name] tab buffer with a file view rooted
+            -- at the new worktree.
+            local ok = pcall(function()
+              Snacks.picker.files({ cwd = path })
+            end)
+            if not ok then
+              vim.cmd("edit " .. vim.fn.fnameescape(path))
+            end
           end)
         end,
       })
