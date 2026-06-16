@@ -4,10 +4,6 @@ local snacks_terminal_opts = {
 	win = {
 		position = "right",
 		enter = false,
-		on_win = function(win)
-			-- Set up keymaps and cleanup for an arbitrary terminal
-			require("opencode.terminal").setup(win.win)
-		end,
 	},
 }
 
@@ -25,8 +21,18 @@ return {
 				input = {}, -- Enhances `ask()`
 				picker = { -- Enhances `select()`
 					actions = {
-						opencode_send = function(...)
-							return require("opencode").snacks_picker_send(...)
+						opencode_send = function(picker)
+							local items = vim.tbl_map(function(item)
+								return item.file
+										and require("opencode").format({
+											path = item.file,
+											from = item.pos,
+											to = item.end_pos,
+										})
+									or item.text
+							end, picker:selected({ fallback = true }))
+
+							require("opencode").prompt(table.concat(items, ", ") .. " ")
 						end,
 					},
 					win = {
@@ -71,7 +77,7 @@ return {
 			require("opencode").select()
 		end, { desc = "Execute opencode action…" })
 		vim.keymap.set({ "n", "t" }, "<C-,>", function()
-			require("opencode").toggle()
+			require("snacks.terminal").toggle(opencode_cmd, snacks_terminal_opts)
 		end, { desc = "Toggle opencode" })
 
 		vim.keymap.set({ "n", "x" }, "<leader>ar", function()
