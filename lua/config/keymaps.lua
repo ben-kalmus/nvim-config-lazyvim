@@ -48,6 +48,7 @@ map({ "n", "v" }, "zh", "zH", { noremap = true })
 map("i", "<S-Tab>", "<C-d>", { desc = "Outdent Line" })
 
 -- Terminal navigation and word movement.
+map("t", "<C-x>", "<C-\\><C-n>", { desc = "Terminal Normal Mode" })
 map("t", "<C-h>", "<cmd>wincmd h<cr>", { desc = "Move to Left Window" })
 map("t", "<C-j>", "<cmd>wincmd j<cr>", { desc = "Move to Window Below" })
 map("t", "<C-k>", "<cmd>wincmd k<cr>", { desc = "Move to Window Above" })

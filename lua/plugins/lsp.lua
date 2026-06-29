@@ -233,6 +233,11 @@ return {
   {
     "neovim/nvim-lspconfig",
     opts = function(_, opts)
+      opts.inlay_hints = {
+        enabled = false,
+        exclude = { "vue" },
+      }
+
       opts.servers = vim.tbl_deep_extend("force", opts.servers or {}, {
         basedpyright = {
           settings = {
@@ -275,13 +280,13 @@ return {
                 vendor = true,
               },
               hints = {
-                assignVariableTypes = false,
-                compositeLiteralFields = false,
-                compositeLiteralTypes = false,
-                constantValues = false,
-                functionTypeParameters = false,
-                parameterNames = false,
-                rangeVariableTypes = false,
+                assignVariableTypes = true,
+                compositeLiteralFields = true,
+                compositeLiteralTypes = true,
+                constantValues = true,
+                functionTypeParameters = true,
+                parameterNames = true,
+                rangeVariableTypes = true,
               },
             },
           },
@@ -367,6 +372,9 @@ return {
           map("n", "K", vim.lsp.buf.hover, "Hover Documentation")
           map("n", "gK", vim.lsp.buf.signature_help, "Signature Help")
           map("n", "<leader>cd", vim.diagnostic.open_float, "Line Diagnostics")
+          map("n", "<leader>uH", function()
+            vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+          end, "Toggle Inlay Hints (Global)")
           map("n", "]d", vim.diagnostic.goto_next, "Next Diagnostic")
           map("n", "[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
 
