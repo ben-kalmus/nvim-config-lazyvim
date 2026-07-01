@@ -2,7 +2,14 @@ return {
     "sindrets/diffview.nvim",
     cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggleFiles", "DiffviewFocusFiles", "DiffviewFileHistory" },
     opts = {
+        enhanced_diff_hl = true,
+        default_args = {
+            DiffviewOpen = { "--imply-local" },
+        },
         view = {
+            default = {
+                winbar_info = true,
+            },
             merge_tool = {
                 layout = "diff3_mixed",
             },

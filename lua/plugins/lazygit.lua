@@ -213,5 +213,7 @@ end
 vim.keymap.set("n", "<leader>gg", function() M.open() end, { desc = "Lazygit" })
 vim.keymap.set("n", "<leader>gl", function() M.log() end, { desc = "Lazygit Log" })
 vim.keymap.set("n", "<leader>gf", function() M.log_file() end, { desc = "Lazygit Current File History" })
+vim.keymap.set("n", "<leader>gd", "<cmd>DiffviewOpen origin/HEAD...HEAD<cr>", { desc = "Diff vs origin/HEAD" })
+vim.keymap.set("n", "<leader>gh", "<cmd>DiffviewFileHistory --range=origin/HEAD...HEAD --right-only --no-merges<cr>", { desc = "PR commit history" })
 
 return {}
