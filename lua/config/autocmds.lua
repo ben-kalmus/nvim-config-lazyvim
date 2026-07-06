@@ -1,6 +1,8 @@
 -- Autocmds are automatically loaded by LazyVim.
 
-vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter" }, {
+-- checktime on FocusGained only. BufEnter causes a disk check on every buffer
+-- switch which adds I/O on large repos with many open buffers.
+vim.api.nvim_create_autocmd("FocusGained", {
     command = "checktime",
 })
 
