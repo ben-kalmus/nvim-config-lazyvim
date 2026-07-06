@@ -45,11 +45,11 @@ return {
 		-- Server Configuration
 		port_range = { min = 10000, max = 65535 },
 		auto_start = true,
-		log_level = "info",
+		log_level = "warn",
 
-		-- Selection Tracking
-		track_selection = true,
-		visual_demotion_delay_ms = 50,
+		-- Selection Tracking disabled - was firing IPC on every cursor move (50ms debounce)
+		-- causing global slowdown while Claude is active. Use <leader>av to send selections manually.
+		track_selection = false,
 
 		-- Terminal Configuration
 		terminal = {
@@ -57,6 +57,11 @@ return {
 			split_width_percentage = 0.40,
 			provider = "snacks",
 			auto_close = true,
+			win = {
+				wo = {
+					scrollback = 2000, -- cap terminal scrollback (default 10000) to reduce render pressure
+				},
+			},
 		},
 
 		-- Git integration - use git root as working directory
