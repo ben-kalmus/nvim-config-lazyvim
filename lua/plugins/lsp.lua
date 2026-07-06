@@ -239,6 +239,32 @@ return {
       }
 
       opts.servers = vim.tbl_deep_extend("force", opts.servers or {}, {
+        golangci_lint_ls = {
+          -- Mirror the nvim-lspconfig default command (v2 flags) with two additions:
+          -- --fast-only: cuts run time from ~2.7s to ~1.1s by skipping slow linters
+          --   (unused, staticcheck, gosec). Fast linters (govet, errcheck, etc) still run.
+          -- --allow-parallel-runners: skips the /tmp/golangci-lint.lock file acquisition.
+          --   Without this, a 5s lock wait triggers when the LSP run overlaps with a
+          --   terminal golangci-lint run or another nvim instance, causing the
+          --   "parallel golangci-lint is running" diagnostic error on line 1.
+          init_options = {
+            command = {
+              "golangci-lint",
+              "run",
+              "--output.text.path=",
+              "--output.tab.path=",
+              "--output.html.path=",
+              "--output.checkstyle.path=",
+              "--output.junit-xml.path=",
+              "--output.teamcity.path=",
+              "--output.sarif.path=",
+              "--fast-only",
+              "--allow-parallel-runners",
+              "--show-stats=false",
+              "--output.json.path=stdout",
+            },
+          },
+        },
         basedpyright = {
           settings = {
             basedpyright = {
@@ -268,7 +294,7 @@ return {
                 shadow = true,
               },
               staticcheck = true,
-              experimentalWorkspaceModule = true,
+              experimentalWorkspaceModule = false,
               allowImplicitNetworkAccess = true,
               codelenses = {
                 gc_details = false,
@@ -279,15 +305,8 @@ return {
                 upgrade_dependency = true,
                 vendor = true,
               },
-              hints = {
-                assignVariableTypes = true,
-                compositeLiteralFields = true,
-                compositeLiteralTypes = true,
-                constantValues = true,
-                functionTypeParameters = true,
-                parameterNames = true,
-                rangeVariableTypes = true,
-              },
+              -- hints are disabled at the nvim level (inlay_hints.enabled=false)
+              -- so do not configure them here to avoid server-side computation
             },
           },
         },
@@ -326,6 +345,14 @@ return {
           end
         end
       end, { desc = "Show currently active gopls build tags" })
+
+      -- Disable document_color globally. It is enabled by default in nvim 0.11+
+      -- and sends textDocument/didChange to every LSP on every keystroke with
+      -- zero debounce (neovim issue #39785). This causes high CPU on gopls and
+      -- golangci_lint_ls for every character typed.
+      if vim.lsp.document_color then
+        vim.lsp.document_color.enable(false)
+      end
 
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
