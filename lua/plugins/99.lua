@@ -60,6 +60,7 @@ return {
 			tmp_dir = "./tmp/99/",
 			logger = {
 				level = _99.DEBUG,
+				type = "file",
 				path = "/tmp/99/" .. basename .. ".99.debug",
 				print_on_error = true,
 			},
