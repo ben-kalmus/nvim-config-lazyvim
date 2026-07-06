@@ -6,8 +6,8 @@ return {
 		local ccc = require("ccc")
 		ccc.setup({
 			highlighter = {
-				auto_enable = true, -- Auto highlight colors in buffer
-				lsp = true, -- Use LSP for color detection
+				auto_enable = false, -- Manual toggle only: <leader>mh
+				lsp = false,
 			},
 			-- Available pickers
 			pickers = {

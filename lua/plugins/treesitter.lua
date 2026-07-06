@@ -4,7 +4,8 @@ local function is_large_file(buf)
 end
 
 return {
-	"nvim-treesitter/nvim-treesitter",
+	{
+		"nvim-treesitter/nvim-treesitter",
 	build = ":TSUpdate",
 	branch = "main",
 	-- commit = "cc12e37e5bdc5467c9a06ab9b0887a97758f567f",
@@ -40,5 +41,23 @@ return {
 				return is_large_file(buf)
 			end,
 		},
+		matchup = {
+			enable = true,
+			disable = function(_, buf)
+				return is_large_file(buf)
+			end,
+		},
+	},
+	},
+	{
+		"andymass/vim-matchup",
+		event = "BufReadPost",
+		init = function()
+			-- Disable the built-in matchparen; vim-matchup replaces it.
+			vim.g.loaded_matchparen = 1
+			vim.g.matchup_matchparen_offscreen = { method = "popup" }
+			vim.g.matchup_matchparen_deferred = 1
+			vim.g.matchup_matchparen_deferred_show_delay = 50
+		end,
 	},
 }

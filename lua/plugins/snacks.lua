@@ -19,9 +19,9 @@ return {
 		},
 		scroll = { enabled = false },
 		dashboard = { enabled = false },
-		-- LSP documentHighlight nav. Powers LazyVim's buffer-local ]]/[[
-		-- (Snacks.words.jump) for jumping references of symbol under cursor.
-		words = { enabled = true },
+		-- LSP documentHighlight nav disabled - illuminate already handles word highlighting
+		-- via treesitter/regex. Enabling both duplicates work on every CursorHold.
+		words = { enabled = false },
 		bigfile = {
 			line_length = 100000,
 			-- Extend Snacks defaults with LSP detach, treesitter stop, and illuminate

@@ -3,6 +3,17 @@ return {
     enabled = true,
     opts = function(_, opts)
         local cmp = require("cmp")
+
+        -- Disable cmp in terminal buffers (e.g. claudecode) to prevent
+        -- cmp-buffer indexing large terminal output on every keystroke.
+        vim.api.nvim_create_autocmd("BufEnter", {
+            callback = function()
+                if vim.bo.buftype == "terminal" then
+                    cmp.setup.buffer({ enabled = false })
+                end
+            end,
+        })
+
         return vim.tbl_deep_extend("force", opts or {}, {
         completion = {
             completeopt = "menu,menuone,noselect,noinsert,popup",

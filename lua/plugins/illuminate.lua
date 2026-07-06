@@ -2,8 +2,8 @@ return {
   "RRethy/vim-illuminate",
   event = "BufReadPost",
   opts = {
-    delay = 100,
-    providers = { "lsp", "treesitter", "regex" },
+    delay = 200,
+    providers = { "treesitter", "regex" },
     large_file_cutoff = 2000,
     filetypes_denylist = {
       "dirbuf",
@@ -12,6 +12,8 @@ return {
       "NvimTree",
       "lazy",
       "mason",
+      "DiffviewFiles",
+      "DiffviewFileHistory",
     },
   },
   config = function(_, opts)
