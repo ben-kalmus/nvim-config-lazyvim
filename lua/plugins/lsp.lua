@@ -240,9 +240,7 @@ return {
 
       opts.servers = vim.tbl_deep_extend("force", opts.servers or {}, {
         golangci_lint_ls = {
-          -- Mirror the nvim-lspconfig default command (v2 flags) with two additions:
-          -- --fast-only: cuts run time from ~2.7s to ~1.1s by skipping slow linters
-          --   (unused, staticcheck, gosec). Fast linters (govet, errcheck, etc) still run.
+          -- Mirror the nvim-lspconfig default command (v2 flags) with one addition:
           -- --allow-parallel-runners: skips the /tmp/golangci-lint.lock file acquisition.
           --   Without this, a 5s lock wait triggers when the LSP run overlaps with a
           --   terminal golangci-lint run or another nvim instance, causing the
@@ -405,8 +403,6 @@ return {
           map("n", "]d", vim.diagnostic.goto_next, "Next Diagnostic")
           map("n", "[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
 
-          -- [[/]] are handled by Snacks.words via LazyVim's LSP keymaps
-          -- (requires documentHighlight capability; falls back to treesitter motions)
         end,
       })
 

@@ -19,17 +19,10 @@ return {
 		},
 		scroll = { enabled = false },
 		dashboard = { enabled = false },
-		-- LSP documentHighlight nav disabled - illuminate already handles word highlighting
-		-- via treesitter/regex. Enabling both duplicates work on every CursorHold.
-		words = { enabled = false },
+		words = { enabled = true },
 		bigfile = {
 			line_length = 100000,
-			-- Extend Snacks defaults with LSP detach, treesitter stop, and illuminate
-			-- pause. Snacks' built-in setup only handles matchparen / completion /
-			-- mini-* / fold options, which leaves the actual freeze sources (LSP
-			-- indexing, treesitter parse on edit, illuminate word scan) running.
 			setup = function(ctx)
-				-- snacks defaults (mirrored from snacks/bigfile.lua)
 				if vim.fn.exists(":NoMatchParen") ~= 0 then
 					vim.cmd("NoMatchParen")
 				end
@@ -42,15 +35,10 @@ return {
 						vim.bo[ctx.buf].syntax = ctx.ft
 					end
 				end)
-
-				-- additions
 				for _, client in pairs(vim.lsp.get_clients({ bufnr = ctx.buf })) do
 					vim.lsp.buf_detach_client(ctx.buf, client.id)
 				end
 				pcall(vim.treesitter.stop, ctx.buf)
-				pcall(function()
-					require("illuminate.engine").stop_buf(ctx.buf)
-				end)
 			end,
 		},
 	},
