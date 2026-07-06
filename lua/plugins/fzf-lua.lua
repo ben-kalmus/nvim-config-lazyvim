@@ -1,14 +1,88 @@
 return {
-    "ibhagwan/fzf-lua",
-    opts = {
-        winopts = {
-            height = 0.9,
-            width = 0.9,
+	"ibhagwan/fzf-lua",
+	cmd = "FzfLua",
+	keys = {},
+	opts = function(_, opts)
+		local fzf = require("fzf-lua")
+		-- local config = fzf.config
+		local actions = fzf.actions
+		return {
+			winopts = {
+				height = 0.9,
+				width = 0.9,
+				preview = {
+					delay = 20,
+					layout = "vertical",
+					vertical = "down:70%",
+				},
+			},
+			previewers = {
+				builtin = {
+					syntax_limit_b = 1024 * 1024, -- 1MB (was 100KB)
+					syntax_limit_l = 5000, -- also cap by line count
+					treesitter = {
+						enabled = true,
+						context_window = 200, -- limit lines treesitter parses for context
+					},
+				},
+			},
+			-- Global keybindings available in all pickers
+			keymap = {
+				builtin = {
+					["<C-/>"] = "toggle-help",
+					["<c-f>"] = "preview-page-down",
+					["<c-b>"] = "preview-page-up",
+				},
+				fzf = {
+					["ctrl-q"] = "select-all+accept",
+					["ctrl-d"] = "half-page-down",
+					["ctrl-u"] = "half-page-up",
 
-            preview = {
-                layout = "vertical",
-                vertical = "down:70%",
-            },
-        },
-    },
+					["ctrl-f"] = "preview-page-down",
+					["ctrl-b"] = "preview-page-up",
+
+					-- Word jumping in search input
+					["ctrl-left"] = "backward-word",
+					["ctrl-right"] = "forward-word",
+					["alt-b"] = "backward-word",
+					["alt-f"] = "forward-word",
+				},
+			},
+			files = {
+				-- Support for !pattern inverse search
+				-- Example: type "!test.go" to exclude test files
+				prompt_title = "Files (use ! to exclude)",
+				git_icons = true,
+				file_icons = true,
+				color_icons = true,
+				-- Additional useful options
+				fd_opts = "--color=auto --type f --hidden --follow --exclude .git",
+				actions = {
+					-- ["ctrl-g"] = function(selected, opts)
+					-- 	require("fzf-lua").live_grep({ query = vim.fn.expand("<cword>") })
+					-- end,
+					["alt-i"] = { actions.toggle_ignore },
+					["alt-h"] = { actions.toggle_hidden },
+				},
+			},
+			grep = {
+				prompt_title = "Live Grep (use ! to exclude)",
+				-- Supports inverse patterns like "search !test.go"
+				-- rg_opts = "--column --line-number --no-heading --color=always --smart-case --max-columns=4096 -e",
+				-- actions = {
+				-- 	["ctrl-f"] = function(selected, opts)
+				-- 		require("fzf-lua").files()
+				-- 	end,
+				-- },
+			},
+			lsp = {
+				-- Exclude declaration from references to avoid duplicates
+				includeDeclaration = false,
+				-- Jump directly if there's only one result (updated option name)
+				jump1 = true,
+				-- Ignore current line to avoid showing where cursor is
+				ignore_current_line = true,
+			},
+		}
+	end,
 }

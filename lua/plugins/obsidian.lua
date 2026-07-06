@@ -29,10 +29,10 @@ return {
         },
         daily_notes = {
             folder = "daily", -- keep daily notes in a separate folder
-            template = "templates/daily.md",
+            template = "notes/templates/daily.md",
         },
         templates = {
-            subdir = "templates",
+            subdir = "notes/templates",
         },
         completion = {
             -- Set to false to disable completion.

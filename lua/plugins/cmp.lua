@@ -1,8 +1,20 @@
-local cmp = require("cmp")
 return {
     "hrsh7th/nvim-cmp",
     enabled = true,
-    opts = {
+    opts = function(_, opts)
+        local cmp = require("cmp")
+
+        -- Disable cmp in terminal buffers (e.g. claudecode) to prevent
+        -- cmp-buffer indexing large terminal output on every keystroke.
+        vim.api.nvim_create_autocmd("BufEnter", {
+            callback = function()
+                if vim.bo.buftype == "terminal" then
+                    cmp.setup.buffer({ enabled = false })
+                end
+            end,
+        })
+
+        return vim.tbl_deep_extend("force", opts or {}, {
         completion = {
             completeopt = "menu,menuone,noselect,noinsert,popup",
         },
@@ -14,13 +26,14 @@ return {
             ["<C-p>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
             -- C-Space is already a tmux keybind
             -- ["<C-Space>"] = cmp.mapping.complete(),
-            ["<tab>"] = LazyVim.cmp.confirm({ select = true }),
-            ["<C-y>"] = LazyVim.cmp.confirm({ select = true }),
+            -- ["<tab>"] = cmp.mapping.confirm({ select = true }),
+            ["<C-y>"] = cmp.mapping.confirm({ select = true }),
+            ["<CR>"] = cmp.mapping.confirm({ select = true }),
             -- Allow <Enter Key> to fallthrough
-            ["<CR>"] = function(fallback)
-                cmp.abort()
-                fallback()
-            end,
+            -- ["<CR>"] = function(fallback)
+            --     cmp.abort()
+            --     fallback()
+            -- end,
 
             -- ["<C-CR>"] = LazyVim.cmp.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
             -- ["<C-CR>"] = function(fallback)
@@ -68,5 +81,6 @@ return {
         --         cmp.config.compare.order,
         --     },
         -- },
-    },
+        })
+    end,
 }
