@@ -47,21 +47,14 @@ return {
 		auto_start = true,
 		log_level = "warn",
 
-		-- Selection Tracking disabled - was firing IPC on every cursor move (50ms debounce)
-		-- causing global slowdown while Claude is active. Use <leader>av to send selections manually.
-		track_selection = false,
+		-- Selection Tracking: re-enabled. The debounce is 100ms and only sends IPC when
+		-- the selection actually changes (change detection guard in selection.lua).
+		-- The previous freeze was caused by illuminate's LSP provider, not this.
+		track_selection = true,
 
 		-- Terminal Configuration
 		terminal = {
-			split_side = "right",
-			split_width_percentage = 0.40,
 			provider = "snacks",
-			auto_close = true,
-			win = {
-				wo = {
-					scrollback = 2000, -- cap terminal scrollback (default 10000) to reduce render pressure
-				},
-			},
 		},
 
 		-- Git integration - use git root as working directory
