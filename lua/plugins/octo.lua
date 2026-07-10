@@ -88,12 +88,24 @@ return {
           if vim.api.nvim_win_get_config(win).relative ~= "" then
             return
           end
+          -- Guard: only one poll loop per buffer at a time. Without this, each
+          -- BufEnter (e.g. every window switch back to the buffer) spawns a
+          -- fresh loop with its own tries counter. They accumulate and fire
+          -- concurrently, causing nlua_schedule_event to pile up and the
+          -- bufnr() pattern matcher to thrash against the full buffer list,
+          -- pegging a CPU core indefinitely.
+          if vim.b[buf].octo_checkout_polling then
+            return
+          end
+          vim.b[buf].octo_checkout_polling = true
+
           local tries = 0
           local function poll()
             tries = tries + 1
             local ob = _G.octo_buffers and _G.octo_buffers[buf]
             if ob and ob:isPullRequest() and ob.node and ob.node.number then
               vim.b[buf].octo_checkout_prompted = true
+              vim.b[buf].octo_checkout_polling = false
               -- skip if already on the PR head branch
               local head = ob.node.headRefName
               local cur = vim.fn.systemlist({ "git", "branch", "--show-current" })[1]
@@ -109,6 +121,10 @@ return {
               end)
             elseif tries < 40 then
               vim.defer_fn(poll, 150)
+            else
+              -- Poll exhausted without finding the PR node. Clear the flag so
+              -- a subsequent BufEnter can retry (e.g. octo finished loading late).
+              vim.b[buf].octo_checkout_polling = false
             end
           end
           vim.defer_fn(poll, 150)

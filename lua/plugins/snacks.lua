@@ -12,12 +12,25 @@ return {
 		input = { enabled = true },
 		picker = { enabled = true },
 		explorer = { enabled = true },
-		terminal = { enabled = true },
+		terminal = {
+			enabled = true,
+			win = {
+				wo = {
+					-- Prevent treesitter foldexpr from running on terminal buffers.
+					-- With foldmethod=expr globally, nvim evaluates folds on every line
+					-- of terminal output, which is slow and serves no purpose in a terminal.
+					foldmethod = "manual",
+					foldexpr = "0",
+				},
+			},
+		},
 		notifier = {
 			enabled = true,
 			timeout = 3000,
+			refresh = 200,
 		},
 		scroll = { enabled = false },
+		indent = { enabled = false },
 		dashboard = { enabled = false },
 		words = { enabled = true },
 		bigfile = {

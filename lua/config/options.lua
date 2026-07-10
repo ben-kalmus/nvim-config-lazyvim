@@ -60,3 +60,5 @@ opt.clipboard = "unnamedplus"
 opt.autoread = true
 opt.jumpoptions:append("clean")
 opt.sessionoptions = "buffers,curdir,tabpages,winsize,help,globals,skiprtp,folds"
+
+opt.listchars = { tab = "· " }
