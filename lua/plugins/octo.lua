@@ -33,6 +33,9 @@ return {
       { "<leader>or", "<cmd>Octo repo list<CR>", desc = "List Repos (Octo)" },
       { "<leader>os", "<cmd>Octo search<CR>", desc = "Search (Octo)" },
       { "<leader>oR", "<cmd>Octo pr reload<CR>", desc = "Reload PR (Octo)" },
+      -- Review-style diff layout WITHOUT starting a review (no "started
+      -- reviewing" posted to GitHub; only populates existing threads).
+      { "<leader>ob", "<cmd>Octo review browse<CR>", desc = "Browse PR diff, no review (Octo)" },
       -- Review: list pending review comments (jump back to a collapsed comment).
       -- localleader (\) keeps it with octo's other review maps (\vs, \vd...).
       -- `Octo review comments` self-guards outside a review, so a global map is safe.

@@ -110,6 +110,16 @@ map("n", "<leader>gdh", "<cmd>DiffviewFileHistory %<cr>", { desc = "File History
 map("v", "<leader>gdh", ":'<,'>DiffviewFileHistory<cr>", { desc = "File History Selection" })
 map("n", "<leader>gdH", "<cmd>DiffviewFileHistory<cr>", { desc = "File History All" })
 map("n", "<leader>gdm", "<cmd>DiffviewOpen HEAD<cr>", { desc = "Diff Uncommitted Changes" })
+map("n", "<leader>gdo", "<cmd>DiffviewOpen origin/HEAD...HEAD<cr>", { desc = "Diff vs origin/HEAD" })
+map("n", "<leader>gh", "<cmd>DiffviewFileHistory --range=origin/HEAD...HEAD --right-only --no-merges<cr>", { desc = "PR commit history" })
+-- map("n", "<leader>gdo", function()
+--   local branch = vim.trim(vim.fn.system("git rev-parse --abbrev-ref HEAD"))
+--   if vim.v.shell_error ~= 0 then
+--     vim.notify("Not in a git repo", vim.log.levels.ERROR)
+--     return
+--   end
+--   vim.cmd("DiffviewOpen origin/" .. branch .. "..." .. branch)
+-- end, { desc = "Diff current branch vs origin" })
 map("n", "<leader>gdM", "<cmd>DiffviewOpen HEAD~1<cr>", { desc = "Diff Last Commit" })
 map("n", "<leader>gdb", function()
   vim.ui.input({ prompt = "Compare branch: " }, function(branch)
