@@ -1,5 +1,23 @@
 return {
 	"lewis6991/gitsigns.nvim",
+	keys = {
+		{
+			"<leader>gB",
+			function()
+				local gs = require("gitsigns")
+				local buf = vim.api.nvim_get_current_buf()
+				local current = vim.b[buf].gitsigns_base
+				if current == "HEAD~1" then
+					gs.change_base(nil)
+					vim.notify("gitsigns: base → index", vim.log.levels.INFO)
+				else
+					gs.change_base("HEAD~1")
+					vim.notify("gitsigns: base → HEAD~1 (last commit)", vim.log.levels.INFO)
+				end
+			end,
+			desc = "Toggle gitsigns base (index ↔ last commit)",
+		},
+	},
 	opts = {
 		-- max_file_length = 40000, -- Disable if file is longer than this (in lines)
 		_threaded_diff = true, -- Fix for "Not in async context" error
