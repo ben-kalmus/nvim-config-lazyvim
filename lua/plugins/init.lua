@@ -1,11 +1,11 @@
 return {
-  {
-    "stevearc/conform.nvim",
-    opts = require "configs.conform",
-  },
+	{
+		"stevearc/conform.nvim",
+		opts = require("configs.conform"),
+	},
 
-  {
-    "mason-org/mason.nvim",
-    opts = { ensure_installed = { "biome" } },
-  },
+	{
+		"mason-org/mason.nvim",
+		opts = { ensure_installed = { "biome" } },
+	},
 }

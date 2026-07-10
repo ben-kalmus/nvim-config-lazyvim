@@ -1,4 +1,4 @@
 return {
-    "stevearc/overseer.nvim",
-    -- version = "1.6.0",
+	"stevearc/overseer.nvim",
+	-- version = "1.6.0",
 }

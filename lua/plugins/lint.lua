@@ -33,7 +33,7 @@ return {
 		})
 
 		-- Manually trigger linting
-        -- this doesnt work
+		-- this doesnt work
 		vim.keymap.set("n", "<leader>cl", function()
 			lint.try_lint()
 		end, { desc = "Trigger linting for current file" })
