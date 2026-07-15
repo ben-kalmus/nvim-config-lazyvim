@@ -1,9 +1,49 @@
 -- Autocmds are automatically loaded by LazyVim.
 
--- checktime on FocusGained only. BufEnter causes a disk check on every buffer
--- switch which adds I/O on large repos with many open buffers.
-vim.api.nvim_create_autocmd("FocusGained", {
-	command = "checktime",
+-- External-edit coexistence (claude-code / opencode write files we have open)
+-- ---------------------------------------------------------------------------
+-- Goal: when an AI plugin edits a file on disk, pull the change in silently
+-- instead of the "W12 / load or overwrite" prompt.
+--
+-- Two pieces are needed:
+--  1. checktime, to notice the on-disk change. FocusGained fires when nvim
+--     regains OS focus, but the AI plugins run *inside* nvim (terminal/job) so
+--     focus never changes. Add idle (CursorHold) and terminal-exit triggers.
+--  2. FileChangedShell handler, to auto-answer the reload/overwrite prompt.
+--
+-- Trade-off: if you have UNSAVED edits to the same file when the AI writes it,
+-- reloading replaces your buffer with the AI's version. We still reload (no
+-- prompt, as requested) but emit a warning so it is not a silent data loss.
+-- Deliberately NOT on BufEnter/BufWinEnter: that stats the disk on every buffer
+-- switch (the I/O the original FocusGained-only comment avoided). CursorHold
+-- already catches AI writes while you stay focused, so it is redundant.
+vim.api.nvim_create_autocmd({ "FocusGained", "CursorHold", "CursorHoldI", "TermLeave", "TermClose" }, {
+	callback = function()
+		-- only real file buffers; skip prompts/terminals/special buffers
+		if vim.bo.buftype == "" and vim.fn.mode() ~= "c" then
+			pcall(vim.cmd.checktime)
+		end
+	end,
+})
+
+vim.api.nvim_create_autocmd("FileChangedShell", {
+	callback = function(args)
+		-- reason: "changed" (disk changed), "conflict" (also modified in nvim),
+		-- "deleted", "renamed". Reload for anything that still exists on disk.
+		if vim.v.fcs_reason == "deleted" then
+			vim.v.fcs_choice = ""
+			return
+		end
+		if vim.bo[args.buf].modified then
+			vim.schedule(function()
+				vim.notify(
+					"Reloaded " .. vim.fn.fnamemodify(args.file, ":t") .. " from disk; unsaved buffer edits were replaced",
+					vim.log.levels.WARN
+				)
+			end)
+		end
+		vim.v.fcs_choice = "reload"
+	end,
 })
 
 vim.api.nvim_create_autocmd("WinLeave", {
