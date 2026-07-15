@@ -1,3 +1,30 @@
+-- Configurable PR filters. Each entry runs a GitHub PR search, which supports
+-- author:, review-requested:, reviewed-by:, assignee:, involves:, label:,
+-- state: and @me (the authenticated gh user). Add/reorder freely.
+local pr_filters = {
+	{ name = "Review requested (me)", query = "review-requested:@me" },
+	{ name = "Authored by me", query = "author:@me" },
+	{ name = "Assigned to me", query = "assignee:@me" },
+	{ name = "Involves me", query = "involves:@me" },
+	-- teammates: add lines like the below (use their GitHub login)
+	-- { name = "Alice's PRs", query = "author:alice-gh" },
+}
+
+-- Pick a filter, then open the PR search picker with it (open PRs only).
+local function octo_pr_filter()
+	vim.ui.select(pr_filters, {
+		prompt = "PR filter",
+		format_item = function(f)
+			return f.name
+		end,
+	}, function(choice)
+		if not choice then
+			return
+		end
+		require("octo.picker").search({ prompt = "is:pr state:open " .. choice.query })
+	end)
+end
+
 return {
 	-- Label the <leader>o prefix in which-key.
 	{
@@ -26,6 +53,7 @@ return {
 			-- rehome under <leader>o
 			{ "<leader>op", "<cmd>Octo pr list<CR>", desc = "List PRs (Octo)" },
 			{ "<leader>oP", "<cmd>Octo pr search<CR>", desc = "Search PRs (Octo)" },
+			{ "<leader>of", octo_pr_filter, desc = "Filter PRs by author/reviewer (Octo)" },
 			{ "<leader>oi", "<cmd>Octo issue list<CR>", desc = "List Issues (Octo)" },
 			{ "<leader>oI", "<cmd>Octo issue search<CR>", desc = "Search Issues (Octo)" },
 			{ "<leader>on", "<cmd>Octo notification list<CR>", desc = "Notifications (Octo)" },
@@ -33,6 +61,7 @@ return {
 			{ "<leader>or", "<cmd>Octo repo list<CR>", desc = "List Repos (Octo)" },
 			{ "<leader>os", "<cmd>Octo search<CR>", desc = "Search (Octo)" },
 			{ "<leader>oR", "<cmd>Octo pr reload<CR>", desc = "Reload PR (Octo)" },
+			{ "<leader>oy", "<cmd>Octo pr url<CR>", desc = "Copy PR URL (Octo)" },
 			-- Review-style diff layout WITHOUT starting a review (no "started
 			-- reviewing" posted to GitHub; only populates existing threads).
 			{ "<leader>ob", "<cmd>Octo review browse<CR>", desc = "Browse PR diff, no review (Octo)" },
@@ -42,6 +71,12 @@ return {
 			{ "<localleader>vc", "<cmd>Octo review comments<CR>", desc = "Review pending comments (Octo)" },
 			{ "<leader>ot", "<cmd>Octo review thread<CR>", desc = "Show comment thread at cursor (Octo)" },
 		},
+		init = function()
+			-- Custom command mirroring the <leader>of keybind.
+			vim.api.nvim_create_user_command("OctoPRFilter", octo_pr_filter, {
+				desc = "Filter PRs by a configured author/reviewer filter",
+			})
+		end,
 		opts = function(_, opts)
 			-- Use the real on-disk file for the RIGHT side of reviews instead of the
 			-- octo:// virtual buffer. Gives full native LSP (hover/gd/gr/diagnostics)

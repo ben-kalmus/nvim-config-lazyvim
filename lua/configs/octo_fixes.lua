@@ -9,6 +9,10 @@
 -- ships upstream.
 --
 -- Call require("configs.octo_fixes").install() from octo's plugin config.
+--
+-- Patches: (1) notification picker crash on CI notifications, (2) "Invalid
+-- buffer id" on picker-preview scroll, (3) persist the submit-review draft
+-- across close/reopen.
 
 local M = {}
 
@@ -276,9 +280,83 @@ local function install_load_buffer_guard()
 	end
 end
 
+-- Patch 3: keep the submit-review summary across close/reopen
+-- -----------------------------------------------------------
+-- octo/reviews/init.lua Review:collect_submit_info() opens a fresh empty float
+-- every time you invoke submit (\vs in review). The body is only read when you
+-- actually submit; if you close the window to go check something, whatever you
+-- typed is lost and the next open is blank.
+--
+-- Fix: keep an in-session draft per review id. Prefill the float from the draft
+-- on open, and save the buffer's lines back to the draft when the window is
+-- left. Drafts live only for the nvim session (fine: a submitted review gets a
+-- new id, so no stale draft is ever reopened). Verbatim copy of
+-- collect_submit_info with the draft prefill/save added (marked PATCH).
+local function install_submit_draft_persistence()
+	local ok, reviews = pcall(require, "octo.reviews")
+	if not ok or type(reviews.Review) ~= "table" then
+		return
+	end
+	local Review = reviews.Review
+	local window = require("octo.ui.window")
+	local config = require("octo.config")
+	local utils = require("octo.utils")
+
+	local default_id = -1
+	local drafts = {} -- [review_id] = string[] of buffer lines
+
+	function Review:collect_submit_info()
+		if self.id == default_id then
+			utils.error("No review in progress")
+			return
+		end
+
+		local conf = config.values
+		local winid, bufnr = window.create_centered_float({
+			header = string.format(
+				"Press %s to approve, %s to comment or %s to request changes",
+				conf.mappings.submit_win.approve_review.lhs,
+				conf.mappings.submit_win.comment_review.lhs,
+				conf.mappings.submit_win.request_changes.lhs
+			),
+		})
+		vim.api.nvim_set_current_win(winid)
+		vim.bo[bufnr].syntax = "octo"
+		utils.apply_mappings("submit_win", bufnr)
+
+		-- >>> PATCH: restore the previous draft for this review, and save it back
+		-- when the window is left so closing to check something doesn't lose it. <<<
+		local review_id = self.id
+		local draft = drafts[review_id]
+		if draft and #draft > 0 then
+			vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, draft)
+		end
+		vim.api.nvim_create_autocmd({ "BufWinLeave", "BufHidden" }, {
+			buffer = bufnr,
+			callback = function()
+				if not vim.api.nvim_buf_is_valid(bufnr) then
+					return
+				end
+				local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+				local blank = true
+				for _, l in ipairs(lines) do
+					if l ~= "" then
+						blank = false
+						break
+					end
+				end
+				drafts[review_id] = blank and nil or lines
+			end,
+		})
+
+		vim.cmd([[normal G]])
+	end
+end
+
 function M.install()
 	install_notifications_fix()
 	install_load_buffer_guard()
+	install_submit_draft_persistence()
 end
 
 return M
