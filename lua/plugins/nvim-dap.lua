@@ -99,6 +99,13 @@ return {
         { "<F5>", function() require("dap").continue() end, desc = "Run/Continue F5" },
         { "<F6>", function() require("dap").pause() end, desc = "Pause F6" },
 
+        { "<M-1>", function() require("dap").step_into() end, desc = "Step Into Alt-1" },
+        { "<M-2>", function() require("dap").step_over() end, desc = "Step Over Alt-2" },
+        { "<M-3>", function() require("dap").step_out() end, desc = "Step Out Alt-3" },
+        { "<M-4>", function() require("dap").run_to_cursor() end, desc = "Run to Cursor Alt-4" },
+        { "<M-5>", function() require("dap").continue() end, desc = "Run/Continue Alt-5" },
+        { "<M-6>", function() require("dap").pause() end, desc = "Pause Alt-6" },
+
         { "<leader>dj", function() require("dap").down() end, desc = "Down" },
         { "<leader>dk", function() require("dap").up() end, desc = "Up" },
 
