@@ -55,6 +55,8 @@ return {
 		-- Terminal Configuration
 		terminal = {
 			provider = "snacks",
+			split_side = "right",
+			split_width_percentage = 0.40,
 		},
 
 		-- Git integration - use git root as working directory
