@@ -6,6 +6,8 @@ return {
 		"yetone/avante.nvim",
 		event = "VeryLazy",
 		version = false,
+		-- unused for now
+		enabled = false,
 		build = "make",
 		opts = {
 			provider = "opencode",

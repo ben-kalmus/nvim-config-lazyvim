@@ -7,7 +7,8 @@ end
 
 map("n", "<C-i>", "<C-i>")
 map("n", "<C-o>", "<C-o>")
-map({ "n", "i", "v" }, "<C-s>", "<cmd>w<cr>", { desc = "Save File" })
+map({ "n", "v" }, "<C-s>", "<cmd>w<cr>", { desc = "Save File" })
+map("i", "<C-s>", "<Esc>:w<cr>", { desc = "Save File" })
 
 -- Snacks-first UI replacements for old NvChad bindings.
 map("n", "<leader>e", function()
@@ -222,8 +223,18 @@ map({ "n", "v", "o", "i" }, "<C-c>", smart_cancel, {
 	desc = "Smart Cancel",
 })
 
+map("n", "<leader>cL", "<cmd>lsp restart<CR>", { desc = "Restart LSP" })
+
 vim.api.nvim_create_user_command("ReloadKeymaps", "luafile ~/.config/nvim/lua/config/keymaps.lua", {})
 vim.api.nvim_create_user_command("ReloadOptions", "luafile ~/.config/nvim/lua/config/options.lua", {})
+
+for i = 1, 9 do
+	map("n", "g" .. i, function()
+		vim.cmd.tabnext(i)
+	end, { desc = "Go to Tab " .. i })
+end
+map("n", "g^", "<cmd>tabfirst<cr>", { desc = "Go to First Tab" })
+map("n", "g$", "<cmd>tablast<cr>", { desc = "Go to Last Tab" })
 
 -- Remove LazyVim defaults that conflict with local habits.
 del("n", "<leader>l")
