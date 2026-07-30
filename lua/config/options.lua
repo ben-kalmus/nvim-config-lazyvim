@@ -19,30 +19,10 @@ opt.shiftwidth = 4
 opt.softtabstop = 4
 opt.expandtab = true
 
--- Cache large-file check per buffer to avoid fs_stat syscall on every fold evaluation.
-local _fold_large_file_cache = {}
-vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
-	callback = function(ev)
-		local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(ev.buf))
-		_fold_large_file_cache[ev.buf] = ok and stats and stats.size > 1024 * 1024
-	end,
-})
-vim.api.nvim_create_autocmd("BufDelete", {
-	callback = function(ev)
-		_fold_large_file_cache[ev.buf] = nil
-	end,
-})
-
-function _G.FoldExpr()
-	local bufnr = vim.api.nvim_get_current_buf()
-	if _fold_large_file_cache[bufnr] then
-		return "0"
-	end
-	return vim.treesitter.foldexpr()
-end
-
-opt.foldmethod = "expr"
-opt.foldexpr = "v:lua.FoldExpr()"
+-- Tree-sitter fold expressions run repeatedly while drawing. Keep folds manual
+-- until explicitly created with `zf`.
+opt.foldmethod = "manual"
+opt.foldexpr = "0"
 opt.foldlevel = 99
 opt.foldlevelstart = 99
 opt.foldenable = true

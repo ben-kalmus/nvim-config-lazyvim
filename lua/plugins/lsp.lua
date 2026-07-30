@@ -75,84 +75,62 @@ local function extract_tags_from_lines(lines)
 	return tags
 end
 
-local function scan_go_build_tags()
-	local cwd = vim.uv.cwd() or vim.loop.cwd()
-	local files = vim.fn.systemlist("git ls-files '*.go' 2>/dev/null")
-
-	if vim.v.shell_error ~= 0 or #files == 0 then
-		files = {}
-		for _, file in ipairs(vim.fn.glob(cwd .. "/**/*.go", false, true)) do
-			files[#files + 1] = file:sub(#cwd + 2)
-		end
-	end
-
+local function extract_tags_from_output(output)
 	local all_tags = {}
-
-	for _, rel_path in ipairs(files) do
-		local abs_path = cwd .. "/" .. rel_path
-		local ok, lines = pcall(function()
-			local f = io.open(abs_path, "r")
-			if not f then
-				return {}
-			end
-
-			local result = {}
-			for i = 1, 20 do
-				local line = f:read("*l")
-				if not line then
-					break
-				end
-				result[i] = line
-			end
-			f:close()
-			return result
-		end)
-
-		if ok and lines and #lines > 0 then
-			for tag in pairs(extract_tags_from_lines(lines)) do
-				all_tags[tag] = true
-			end
-		end
+	for tag in pairs(extract_tags_from_lines(vim.split(output, "\n"))) do
+		all_tags[tag] = true
 	end
-
 	local result = vim.tbl_keys(all_tags)
 	table.sort(result)
 	return result
 end
 
-local function apply_gopls_build_tags(tags)
+local gopls_tag_cache = {}
+
+local function apply_gopls_build_tags(root, tags)
 	if #tags == 0 then
 		return
 	end
 
 	local flag = "-tags=" .. table.concat(tags, ",")
 	for _, client in ipairs(vim.lsp.get_clients({ name = "gopls" })) do
-		client.settings = vim.tbl_deep_extend("force", client.settings or {}, {
-			gopls = {
-				buildFlags = { flag },
-			},
-		})
-		client:notify("workspace/didChangeConfiguration", { settings = client.settings })
+		if client.config.root_dir == root then
+			client.settings = vim.tbl_deep_extend("force", client.settings or {}, {
+				gopls = {
+					buildFlags = { flag },
+				},
+			})
+			client:notify("workspace/didChangeConfiguration", { settings = client.settings })
+		end
 	end
 end
 
-local gopls_tags_applied = false
-
-local function refresh_gopls_tags(opts)
-	opts = opts or {}
-	if gopls_tags_applied and not opts.force then
+local function refresh_gopls_tags(root, opts)
+	if not root then
 		return
 	end
-
-	local tags = scan_go_build_tags()
-	gopls_tags_applied = true
-
-	if #tags > 0 then
-		apply_gopls_build_tags(tags)
-		if not opts.silent then
-			vim.notify("gopls: auto-detected build tags: " .. table.concat(tags, ", "), vim.log.levels.INFO)
-		end
+	opts = opts or {}
+	if gopls_tag_cache[root] and not opts.force then
+		return
 	end
+	gopls_tag_cache[root] = true
+
+	vim.system({ "git", "grep", "-h", "-E", "^//(go:build|[[:space:]]+\\+build)[[:space:]]", "--", "*.go" }, {
+		cwd = root,
+		text = true,
+	}, function(result)
+		if result.code ~= 0 and result.code ~= 1 then
+			gopls_tag_cache[root] = nil
+			return
+		end
+		local tags = extract_tags_from_output(result.stdout)
+		vim.schedule(function()
+			apply_gopls_build_tags(root, tags)
+			if #tags > 0 and not opts.silent then
+				vim.notify("gopls: auto-detected build tags: " .. table.concat(tags, ", "), vim.log.levels.INFO)
+			end
+		end)
+	end)
 end
 
 local function is_large_file(bufnr)
@@ -208,9 +186,9 @@ return {
 						basedpyright = {
 							disableOrganizeImports = true,
 							analysis = {
-								autoSearchPaths = true,
-								useLibraryCodeForTypes = true,
-								diagnosticMode = "workspace",
+							autoSearchPaths = true,
+							useLibraryCodeForTypes = true,
+							diagnosticMode = "openFilesOnly",
 							},
 						},
 					},
@@ -265,7 +243,9 @@ return {
 		end,
 		init = function()
 			vim.api.nvim_create_user_command("GoplsRefreshTags", function()
-				refresh_gopls_tags({ force = true })
+				for _, client in ipairs(vim.lsp.get_clients({ name = "gopls" })) do
+					refresh_gopls_tags(client.config.root_dir, { force = true })
+				end
 			end, { desc = "Re-scan workspace for Go build tags and apply to gopls" })
 
 			vim.api.nvim_create_user_command("GoplsBuildTags", function()
@@ -326,7 +306,7 @@ return {
 
 					if client and client.name == "gopls" then
 						vim.schedule(function()
-							refresh_gopls_tags()
+							refresh_gopls_tags(client.config.root_dir)
 						end)
 					end
 

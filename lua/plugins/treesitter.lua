@@ -35,29 +35,9 @@ return {
 					return is_large_file(buf)
 				end,
 			},
-			indent = {
-				enable = true,
-				disable = function(_, buf)
-					return is_large_file(buf)
-				end,
-			},
-			matchup = {
-				enable = true,
-				disable = function(_, buf)
-					return is_large_file(buf)
-				end,
-			},
+			indent = { enable = false },
+			matchup = { enable = false },
 		},
 	},
-	{
-		"andymass/vim-matchup",
-		event = "BufReadPost",
-		init = function()
-			-- Disable the built-in matchparen; vim-matchup replaces it.
-			vim.g.loaded_matchparen = 1
-			vim.g.matchup_matchparen_offscreen = { method = "popup" }
-			vim.g.matchup_matchparen_deferred = 1
-			vim.g.matchup_matchparen_deferred_show_delay = 50
-		end,
-	},
+	{ "andymass/vim-matchup", enabled = false },
 }

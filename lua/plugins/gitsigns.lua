@@ -19,7 +19,7 @@ return {
 		},
 	},
 	opts = {
-		-- max_file_length = 40000, -- Disable if file is longer than this (in lines)
+		max_file_length = 20000,
 		_threaded_diff = true, -- Fix for "Not in async context" error
 		signs_staged_enable = true,
 		signcolumn = true, -- Toggle with `:Gitsigns toggle_signs`

@@ -60,16 +60,6 @@ return {
 			end,
 		})
 
-		-- Clear when any floating window opens
-		vim.api.nvim_create_autocmd("WinEnter", {
-			group = group,
-			callback = function()
-				if vim.api.nvim_win_get_config(0).relative ~= "" then
-					image.clear()
-				end
-			end,
-		})
-
 		-- Toggle functionality
 		_G.image_nvim_enabled = true
 
