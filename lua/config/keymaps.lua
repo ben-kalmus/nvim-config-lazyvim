@@ -9,6 +9,7 @@ map("n", "<C-i>", "<C-i>")
 map("n", "<C-o>", "<C-o>")
 map({ "n", "v" }, "<C-s>", "<cmd>w<cr>", { desc = "Save File" })
 map("i", "<C-s>", "<Esc>:w<cr>", { desc = "Save File" })
+map({ "n", "v" }, "Y", '"+y', { desc = "Save File" })
 
 -- Snacks-first UI replacements for old NvChad bindings.
 map("n", "<leader>e", function()
@@ -54,6 +55,7 @@ map("t", "<C-h>", "<cmd>wincmd h<cr>", { desc = "Move to Left Window" })
 map("t", "<C-j>", "<cmd>wincmd j<cr>", { desc = "Move to Window Below" })
 map("t", "<C-k>", "<cmd>wincmd k<cr>", { desc = "Move to Window Above" })
 map("t", "<C-l>", "<cmd>wincmd l<cr>", { desc = "Move to Right Window" })
+-- CSI u escaped key maps
 map("t", "<C-Left>", function()
 	vim.fn.chansend(vim.b.terminal_job_id, "\27[1;5D")
 end, { desc = "Word Left in Terminal" })
