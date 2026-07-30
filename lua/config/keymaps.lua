@@ -55,10 +55,10 @@ map("t", "<C-j>", "<cmd>wincmd j<cr>", { desc = "Move to Window Below" })
 map("t", "<C-k>", "<cmd>wincmd k<cr>", { desc = "Move to Window Above" })
 map("t", "<C-l>", "<cmd>wincmd l<cr>", { desc = "Move to Right Window" })
 map("t", "<C-Left>", function()
-	vim.fn.chansend(vim.b.terminal_job_id, "\27b")
+	vim.fn.chansend(vim.b.terminal_job_id, "\27[1;5D")
 end, { desc = "Word Left in Terminal" })
 map("t", "<C-Right>", function()
-	vim.fn.chansend(vim.b.terminal_job_id, "\27f")
+	vim.fn.chansend(vim.b.terminal_job_id, "\27[1;5C")
 end, { desc = "Word Right in Terminal" })
 
 -- Diff and Git hunk navigation.
