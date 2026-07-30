@@ -2,6 +2,7 @@ return {
 	"ThePrimeagen/99",
 	dependencies = {
 		"ibhagwan/fzf-lua", -- for model/provider selection
+		"saghen/blink.compat",
 	},
 	keys = {
 		{
@@ -55,7 +56,7 @@ return {
 		_99.setup({
 
 			provider = _99.Providers.ClaudeCodeProvider,
-			completion = { source = "cmp" },
+			completion = { source = "blink" },
 			md_files = { "CLAUDE.md" },
 			tmp_dir = "./tmp/99/",
 			logger = {

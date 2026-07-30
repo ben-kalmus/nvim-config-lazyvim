@@ -33,7 +33,12 @@ return {
 			max_width_window_percentage = 80,
 			max_height_window_percentage = 50,
 			window_overlap_clear_enabled = true, -- auto clear images when windows overlap
-			window_overlap_clear_ft_ignore = { "cmp_menu", "cmp_docs", "scrollview", "scrollview_sign" },
+			window_overlap_clear_ft_ignore = {
+				"blink-cmp-menu",
+				"blink-cmp-documentation",
+				"scrollview",
+				"scrollview_sign",
+			},
 			editor_only_render_when_focused = true, -- hide images when losing focus
 			tmux_show_only_in_active_window = false,
 			hijack_file_patterns = { "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp", "*.avif" },
