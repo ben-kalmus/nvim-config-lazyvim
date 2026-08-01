@@ -1,4 +1,5 @@
 local opencode_cmd = "env -u TMUX opencode --auto --port"
+-- local opencode_cmd = "env -u TMUX opencode --port"
 
 local snacks_terminal_opts = {
 	win = {
@@ -61,6 +62,11 @@ return {
 				toggle = function()
 					require("snacks.terminal").toggle(opencode_cmd, snacks_terminal_opts)
 				end,
+			},
+			events = {
+				permissions = {
+					enabled = false,
+				},
 			},
 			lsp = {
 				enabled = true,
