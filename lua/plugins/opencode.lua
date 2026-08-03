@@ -88,8 +88,66 @@ return {
 
 		-- Recommended/example keymaps
 		vim.keymap.set({ "n", "x" }, "<leader>aa", function()
-			require("opencode").ask("@this: ", { submit = true })
-		end, { desc = "Ask opencode…" })
+			local composer = require("opencode.translator.composer")
+			if composer.is_open() then
+				composer.focus()
+			else
+				composer.open():catch(function(err)
+					-- err may be nil (user closed without sending) or "cancelled"
+					-- (superseded by a newer open()) — both are normal outcomes.
+					if err and err ~= "cancelled" then
+						vim.notify(tostring(err), vim.log.levels.ERROR, { title = "opencode translator" })
+					end
+				end)
+			end
+		end, { desc = "Compose prompt in side window" })
+
+		-- Shared operatorfunc for <leader>ap / <leader>ao: appends the motion /
+		-- selection range as an "@this" ref to the open composer buffer.
+		local function composer_ref_operator()
+			_G.opencode_composer_ref_operator = function(kind)
+				local from = vim.api.nvim_buf_get_mark(0, "[")
+				local to = vim.api.nvim_buf_get_mark(0, "]")
+				if from[1] > to[1] or (from[1] == to[1] and from[2] > to[2]) then
+					from, to = to, from
+				end
+
+				require("opencode.server.discovery")
+					.get()
+					:next(function(server)
+						local context = require("opencode.context").new(server, {
+							from = { from[1], from[2] },
+							to = { to[1], to[2] },
+							kind = kind,
+						})
+						local ref = context:render("@this").output:plaintext()
+						-- Context.new highlights the range with a persistent "Visual" extmark; clear it
+						-- now that the ref is captured, mirroring the plugin's prompt lifecycle.
+						context:clear()
+						if ref then
+							if not require("opencode.translator.composer").add_ref(ref) then
+								vim.notify("no composer open", vim.log.levels.WARN, { title = "opencode translator" })
+							end
+						else
+							vim.notify("no ref for buffer", vim.log.levels.WARN, { title = "opencode translator" })
+						end
+					end)
+					:catch(function(err)
+						vim.notify(tostring(err), vim.log.levels.ERROR, { title = "opencode translator" })
+					end)
+			end
+			vim.o.operatorfunc = "v:lua.opencode_composer_ref_operator"
+		end
+
+		vim.keymap.set({ "n", "x" }, "<leader>ap", function()
+			composer_ref_operator()
+			return "g@"
+		end, { desc = "Add range ref to composer", expr = true })
+		vim.keymap.set({ "n", "x" }, "<leader>ao", function()
+			composer_ref_operator()
+			return "g@_"
+		end, { desc = "Add line ref to composer", expr = true })
+
 		vim.keymap.set({ "n", "x" }, "<leader>as", function()
 			require("opencode").select()
 		end, { desc = "Execute opencode action…" })

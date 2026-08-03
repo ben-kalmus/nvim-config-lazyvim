@@ -61,7 +61,7 @@ local defaults = {
 		api_key = nil, -- resolved at call time: provider.api_key, else vim.env.OPENROUTER_API_KEY
 		model = "meta-llama/llama-3.1-8b-instruct",
 		temperature = 0.2,
-		timeout = 30,
+		timeout = 120,
 	},
 }
 
@@ -227,8 +227,13 @@ local function invoke_provider(sentinel_text, sentinels, attempt_no)
 				.. "\nA previous attempt failed because a placeholder token was missing or altered. This attempt MUST contain every placeholder token listed above, verbatim."
 		end
 	end
+	local body = "<prompt>\n" .. sentinel_text .. "\n</prompt>"
+	system_prompt = system_prompt
+		.. "\n\nThe developer's prompt is the entire content between the <prompt> and </prompt> tags below."
+		.. " Rewrite the content inside the tags only."
+		.. " Reply with the rewritten prompt only: no commentary, no explanations, no markdown, and do not repeat the tags."
 	return require("opencode.translator.openai").translate(
-		sentinel_text,
+		body,
 		vim.tbl_extend("force", provider, {
 			api_key = key,
 			system_prompt = system_prompt,
@@ -298,11 +303,15 @@ local function policy(raw, err, retry_once)
 	return Promise.resolve(raw)
 end
 
----Translate `raw` per the current options.
+---Translate `raw` per the current options, WITHOUT applying the delivery mode.
+---This is the mode-free pipeline: enabled check -> tokenize -> sentinelize ->
+---invoke with retries -> on_error policy. `M.process` applies the mode exactly
+---once at the end, so a policy "Retry" re-run never double-applies confirm
+---preview delivery.
 ---@param raw string
 ---@param context opencode.context.Context
 ---@return Promise<string>
-function M.process(raw, context)
+function M.translate(raw, context)
 	local Promise = require("opencode.promise")
 	if not M.opts.enabled then
 		return Promise.resolve(raw)
@@ -322,6 +331,38 @@ function M.process(raw, context)
 		return attempt(sentineled, sentinels, occurrences, 1)
 	end
 
+	-- Retry via the ask policy re-runs the mode-free path only (translate +
+	-- retries + policy). The delivery mode is applied by M.process after this
+	-- chain, so a "Retry" re-run never double-applies the confirm preview.
+	local full_path
+	full_path = function()
+		return invoke():catch(function(err)
+			log("aborted err=" .. tostring(err))
+			return policy(raw, err, full_path)
+		end)
+	end
+
+	return full_path()
+end
+
+---Full pipeline: translate, then apply the delivery mode exactly once.
+---Confirm mode opens a persistent side-window preview (translator.preview)
+---with the translated prompt; the user accepts or cancels there. The preview
+---result is never re-translated.
+---@param raw string
+---@param context opencode.context.Context
+---@return Promise<string>
+function M.process(raw, context)
+	local Promise = require("opencode.promise")
+
+	-- Disabled: return the raw prompt without applying the delivery mode.
+	-- (M.translate keeps its own enabled check for the composer's mode-free
+	-- identity path; here the gate must sit BEFORE apply_mode so confirm mode
+	-- can never fire preview.show for a disabled translator.)
+	if not M.opts.enabled then
+		return Promise.resolve(raw)
+	end
+
 	---Apply the delivery mode; the confirm result is never re-translated.
 	---Confirm mode opens a persistent side-window preview (translator.preview)
 	---with the translated prompt; the user accepts or cancels there.
@@ -334,22 +375,10 @@ function M.process(raw, context)
 		return text
 	end
 
-	-- Retry via the ask policy re-runs the whole path (translate + mode + policy).
-	local full_path
-	full_path = function()
-		return invoke()
-			:catch(function(err)
-				log("aborted err=" .. tostring(err))
-				return policy(raw, err, full_path)
-			end)
-			:next(apply_mode)
-			:next(function(text)
-				log("done resolved_len=" .. #text)
-				return Promise.resolve(text)
-			end)
-	end
-
-	return full_path()
+	return M.translate(raw, context):next(apply_mode):next(function(text)
+		log("done resolved_len=" .. #text)
+		return Promise.resolve(text)
+	end)
 end
 
 ---Flip the enabled flag; returns the new value.
