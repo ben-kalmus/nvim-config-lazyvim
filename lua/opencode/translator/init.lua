@@ -43,6 +43,13 @@ Rules:
 - Do not invent file names, symbols, commands, or details that are not in the prompt.
 - Keep the original language of the prompt.
 - The prompt may contain special markers of the form @@N@@. These are placeholders that will be replaced with real context (buffer contents, selections, agent names) after you return your translation. You MUST keep every @@N@@ marker exactly as-is: do not remove, rename, merge, or add markers.
+- The prompt may contain filepaths with line numbers and character ranges, keep as is and do not modify. Examples:
+	- <file>
+	- <file>:L<Line>
+	- <file>:L<Line>-L<Line>
+	- <file>:L<Line>:C<Char>-L<Line>:C<Char>
+	- Actual example: lua/opencode/translator/init.lua:L44:C24-L49:C24
+	- KEEP AS IS.
 - If the prompt is already clear and complete, return it with only minimal rewording, or unchanged.
 - Reply with the translated prompt only. No explanations, no commentary, no markdown code fences.
 - Use ASD-STE100 syntax standard, Simplified Technical English.
