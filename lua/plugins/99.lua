@@ -1,3 +1,17 @@
+-- additional_prompt:
+-- If provided, skips the interactive prompt buffer entirely and sends the string directly as the prompt. If omitted, you get the normal prompt capture window where you type your prompt (with @file / #rule completions).
+-- With additional_prompt — no prompt buffer, sends instantly
+-- _99.visual({ additional_prompt = "add error handling to this function" })
+-- Without — opens the prompt buffer for you to type
+-- _99.visual()
+-- additional_rules: Injects Rule objects (name + path to a markdown file) into the AI context. The rule content gets appended to the system prompt. Works the same way #rule completions work in the prompt buffer, but done programmatically.
+-- _99.visual({
+-- additional_rules = {
+-- { name = "lua-style", path = "./rules/lua-style.md" },
+-- },
+-- additional_prompt = "refactor this to be more idiomatic",
+--
+
 return {
 	"ThePrimeagen/99",
 	dependencies = {
@@ -6,13 +20,42 @@ return {
 	},
 	keys = {
 		{
-			"<leader>0a",
+			"<leader>00",
 			function()
 				require("99").visual()
 			end,
 			desc = "99: Send visual selection",
-			mode = { "n", "v" },
+			mode = { "v" },
 		},
+		{
+			"<leader>0o",
+			function()
+				require("99").open()
+			end,
+			desc = "99: Open interaction window",
+		},
+		{
+			"<leader>0l",
+			function()
+				require("99").view_logs()
+			end,
+			desc = "99: View logs",
+		},
+		{
+			"<leader>0c",
+			function()
+				require("99").clear_previous_requests()
+			end,
+			desc = "99: Wipes history!!",
+		},
+		{
+			"<leader>0i",
+			function()
+				require("99").info()
+			end,
+			desc = "99: Show request info and rules",
+		},
+
 		{
 			"<leader>0x",
 			function()
@@ -55,9 +98,12 @@ return {
 		local basename = vim.fs.basename(cwd)
 		_99.setup({
 
-			provider = _99.Providers.ClaudeCodeProvider,
+			provider = _99.Providers.OpenCodeProvider,
 			completion = { source = "blink" },
-			md_files = { "CLAUDE.md" },
+			md_files = {
+				"AGENTS.md",
+				"AGENT.md",
+			},
 			tmp_dir = "./tmp/99/",
 			logger = {
 				level = _99.DEBUG,
