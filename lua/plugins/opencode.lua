@@ -87,7 +87,7 @@ return {
 		require("opencode.translator.patch").apply()
 
 		-- Recommended/example keymaps
-		vim.keymap.set({ "n", "x" }, "<leader>aa", function()
+		vim.keymap.set({ "n", "x" }, "<leader>aC", function()
 			local composer = require("opencode.translator.composer")
 			if composer.is_open() then
 				composer.focus()
@@ -148,7 +148,7 @@ return {
 			return "g@_"
 		end, { desc = "Add line ref to composer", expr = true })
 
-		vim.keymap.set({ "n", "x" }, "<leader>as", function()
+		vim.keymap.set({ "n", "x" }, "<leader>aA", function()
 			require("opencode").select()
 		end, { desc = "Execute opencode action…" })
 		vim.keymap.set({ "n", "t" }, "<C-,>", function()
@@ -168,7 +168,7 @@ return {
 		vim.keymap.set("n", "<S-C-d>", function()
 			require("opencode").command("session.half.page.down")
 		end, { desc = "Scroll opencode down" })
-		vim.keymap.set("n", "<leader>at", function()
+		vim.keymap.set("n", "<leader>aT", function()
 			require("opencode.translator").toggle()
 		end, { desc = "Toggle opencode translator" })
 	end,

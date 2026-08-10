@@ -5,9 +5,7 @@ return {
 	{
 		"yetone/avante.nvim",
 		event = "VeryLazy",
-		version = false,
-		-- unused for now
-		enabled = false,
+		-- version = false,
 		build = "make",
 		opts = {
 			provider = "opencode",
@@ -20,11 +18,10 @@ return {
 			},
 
 			behaviour = {
-				-- Watch the agent jump to / edit files as it works.
+				auto_apply_diff_after_generation = false,
 				acp_follow_agent_locations = true,
 			},
 
-			-- Optional: nicer defaults
 			windows = {
 				width = 35,
 				sidebar_header = {
@@ -32,16 +29,16 @@ return {
 					align = "center",
 					rounded = true,
 				},
+				ask = {
+					floating = true,
+					start_insert = true,
+				},
 			},
 		},
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"MunifTanjim/nui.nvim",
-
-			-- Icons: LazyVim usually already has mini.icons or nvim-web-devicons.
 			"nvim-mini/mini.icons",
-
-			-- Optional but recommended for Avante markdown rendering.
 			{
 				"MeanderingProgrammer/render-markdown.nvim",
 				opts = {
@@ -51,11 +48,13 @@ return {
 			},
 		},
 		keys = {
-			{ "<C-'>", "<cmd>AvanteToggle<cr>", desc = "Avante Toggle", mode = { "n", "v", "i" } },
-			{ "<leader>AA", "<cmd>AvanteAsk<cr>", desc = "Avante Ask", mode = { "n", "v" } },
-			{ "<leader>AE", "<cmd>AvanteEdit<cr>", desc = "Avante Edit", mode = { "n", "v" } },
-			{ "<leader>AR", "<cmd>AvanteRefresh<cr>", desc = "Avante Refresh" },
-			{ "<leader>AF", "<cmd>AvanteFocus<cr>", desc = "Avante Focus" },
+			{ "<C-'>", "<cmd>AvanteToggle<cr>", desc = "Avante Toggle sidebar", mode = { "n", "v", "i" } },
+			{ "<leader>at", "<cmd>AvanteToggle<cr>", desc = "Avante Toggle sidebar", mode = { "n", "v", "i" } },
+			{ "<leader>ae", "<cmd>AvanteEdit<cr>", desc = "Avante Edit selection", mode = { "n", "v" } },
+			{ "<leader>aa", "<cmd>AvanteAsk<cr>", desc = "Avante Ask (floating)", mode = { "n", "v" } },
+			{ "<leader>as", "<cmd>AvanteStop<cr>", desc = "Avante Stop" },
+			{ "<leader>ah", "<cmd>AvanteHistory<cr>", desc = "Avante History" },
+			{ "<leader>af", "<cmd>AvanteFocus<cr>", desc = "Avante Focus sidebar" },
 		},
 	},
 }
