@@ -1,6 +1,5 @@
 return {
 	"coder/claudecode.nvim",
-	enabled = false,
 	dependencies = {
 		"folke/snacks.nvim",
 	},
@@ -12,33 +11,33 @@ return {
 			desc = "Toggle Claude Code",
 			mode = { "n", "v", "t", "x" },
 		},
-		{ "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude Code" },
-		{ "<leader>af", "<cmd>ClaudeCodeFocus<cr>", desc = "Focus Claude Code" },
-		{ "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude Code" },
-		{ "<leader>aR", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude Code Session" },
-		{ "<leader>aV", "<cmd>ClaudeCodeVerbose<cr>", desc = "Claude Code Verbose" },
+		{ "<leader>CC", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude Code" },
+		{ "<leader>Cf", "<cmd>ClaudeCodeFocus<cr>", desc = "Focus Claude Code" },
+		{ "<leader>Cc", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude Code" },
+		{ "<leader>CR", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude Code Session" },
+		-- { "<leader>CV", "<cmd>ClaudeCodeVerbose<cr>", desc = "Claude Code Verbose" },
 
 		-- Model and context management
-		{ "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude Model" },
-		{ "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add Current Buffer to Claude" },
+		{ "<leader>Cm", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude Model" },
+		{ "<leader>CB", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add Current Buffer to Claude" },
 		{
-			"<leader>av",
+			"<leader>CV",
 			"<cmd>ClaudeCodeSend<cr>",
 			mode = "v",
 			desc = "Send Selection to Claude",
 		},
 
-		-- Tree file additions (capital T for Claude)
+		-- Tree file additions
 		{
-			"<leader>aT",
+			"<leader>CF",
 			"<cmd>ClaudeCodeTreeAdd<cr>",
 			desc = "Add File from Tree to Claude",
 			ft = { "NvimTree", "neo-tree", "oil", "minifiles", "netrw" },
 		},
 
 		-- Diff management (capital A and D to avoid opencode conflicts)
-		{ "<leader>aA", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept Claude Diff" },
-		{ "<leader>aD", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny Claude Diff" },
+		{ "<leader>CA", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept Claude Diff" },
+		{ "<leader>CD", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny Claude Diff" },
 	},
 	opts = {
 		terminal_cmd = "env -u TMUX claude --allow-dangerously-skip-permissions",
