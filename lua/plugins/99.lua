@@ -98,7 +98,8 @@ return {
 		local basename = vim.fs.basename(cwd)
 		_99.setup({
 
-			provider = _99.Providers.OpenCodeProvider,
+			provider = _99.Providers.ClaudeCodeProvider,
+			model = "claude-opus-4-6",
 			completion = { source = "blink" },
 			md_files = {
 				"AGENTS.md",
