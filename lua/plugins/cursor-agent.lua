@@ -1,7 +1,7 @@
 return {
 	-- "xTacobaco/cursor-agent.nvim", -- original creator
 	"waldnzwrld/cursor-agent.nvim",
-	-- enabled = false,
+	enabled = false,
 	-- branch = "sidebar-instead-of-floating-window",
 	cmd = { "CursorAgent", "CursorAgentSelection", "CursorAgentBuffer" },
 	keys = {
