@@ -8,12 +8,22 @@ return {
 		version = false,
 		build = "make",
 		opts = {
-			provider = "opencode",
+			provider = "claude-code",
 
 			acp_providers = {
 				opencode = {
 					command = opencode_acp_cmd,
 					args = opencode_acp_args,
+				},
+				-- Uses the local claude CLI's stored subscription credentials
+				["claude-code"] = {
+					command = "npx",
+					-- alternative: @zed-industries/claude-code-acp
+					args = { "-y", "@agentclientprotocol/claude-agent-acp" },
+					env = {
+						-- generate token with `claude setup-token` and place under env
+						CLAUDE_CODE_OAUTH_TOKEN = os.getenv("CLAUDE_CODE_OAUTH_TOKEN"),
+					},
 				},
 			},
 
@@ -33,6 +43,7 @@ return {
 			behaviour = {
 				auto_apply_diff_after_generation = false,
 				acp_follow_agent_locations = true,
+				auto_focus_on_diff_view = true,
 			},
 
 			windows = {
