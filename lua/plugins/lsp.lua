@@ -293,6 +293,15 @@ return {
 				vim.lsp.document_color.enable(false)
 			end
 
+			-- Force inlay hints off globally at startup. opts.inlay_hints.enabled=false
+			-- only stops LazyVim from auto-enabling on attach; it does not reset stale
+			-- global state from a prior session. This guarantees off-by-default.
+			-- Toggle globally on demand via <leader>uH (registered below).
+			vim.lsp.inlay_hint.enable(false)
+			vim.keymap.set("n", "<leader>uH", function()
+				vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+			end, { desc = "Toggle Inlay Hints (Global)" })
+
 			vim.api.nvim_create_autocmd("LspAttach", {
 				group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
 				callback = function(args)
@@ -331,9 +340,6 @@ return {
 					map("n", "K", vim.lsp.buf.hover, "Hover Documentation")
 					map("n", "gK", vim.lsp.buf.signature_help, "Signature Help")
 					map("n", "<leader>cd", vim.diagnostic.open_float, "Line Diagnostics")
-					map("n", "<leader>uH", function()
-						vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
-					end, "Toggle Inlay Hints (Global)")
 					map("n", "]d", vim.diagnostic.goto_next, "Next Diagnostic")
 					map("n", "[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
 				end,
