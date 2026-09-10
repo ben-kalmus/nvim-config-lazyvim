@@ -1,18 +1,51 @@
 -- Test argument presets for running tests with custom flags
 -- Use <leader>ta to select a preset when running tests
 -- Args must use = format (e.g., -provider=aws, not -provider aws)
+--
+-- kind = "test_flags"   -> real `go test` flags (e.g. -cover, -tags), merged with base_go_test_args
+-- kind = "program_args" -> forwarded to the test binary after `-args`, merged with base_go_test_args
+local base_go_test_args = {
+	"-v",
+	"-race",
+	"-count=1",
+	"-timeout=200s",
+}
+
 local arg_presets = {
-	["Minimetis"] = { "-provider=local", "-instance=local", "-domain=localhost", "-n=minimetis" },
+	["Minimetis"] = {
+		kind = "program_args",
+		args = { "-provider=local", "-instance=local", "-domain=localhost", "-n=minimetis" },
+	},
+	["coverage"] = {
+		kind = "test_flags",
+		args = { "-cover", "-coverpkg=./...", "-coverprofile=coverage.out" },
+	},
+	["integration tags"] = {
+		kind = "test_flags",
+		args = { "-tags=integration" },
+	},
 	-- Add more presets here
 }
 
 local last_custom_args = nil
 
+-- Builds the final go_test_args list: base flags plus the preset's flags,
+-- with program_args appended after `-args` so they reach the test binary
+-- instead of being (mis)parsed as `go test` flags.
+local function build_go_test_args(preset)
+	local final_args = vim.deepcopy(base_go_test_args)
+	if preset.kind == "program_args" then
+		table.insert(final_args, "-args")
+	end
+	vim.list_extend(final_args, preset.args)
+	return final_args
+end
+
 local function select_preset(callback)
 	local choices = { "Custom (enter manually)" }
 
 	if last_custom_args then
-		table.insert(choices, "Last Used: " .. table.concat(last_custom_args, " "))
+		table.insert(choices, "Last Used: " .. table.concat(last_custom_args.args, " "))
 	end
 
 	for name in pairs(arg_presets) do
@@ -25,18 +58,18 @@ local function select_preset(callback)
 		end
 
 		if choice == "Custom (enter manually)" then
-			local default_str = last_custom_args and table.concat(last_custom_args, " ") or ""
-			vim.ui.input({ prompt = "Test args: ", default = default_str }, function(input)
+			local default_str = last_custom_args and table.concat(last_custom_args.args, " ") or ""
+			vim.ui.input({ prompt = "Test args (forwarded to test binary): ", default = default_str }, function(input)
 				if input and input ~= "" then
-					last_custom_args = vim.split(input, " ")
-					callback(last_custom_args)
+					last_custom_args = { kind = "program_args", args = vim.split(input, " ") }
+					callback(build_go_test_args(last_custom_args))
 				end
 			end)
 		elseif choice:match("^Last Used:") then
-			callback(last_custom_args)
+			callback(build_go_test_args(last_custom_args))
 		else
 			last_custom_args = arg_presets[choice]
-			callback(arg_presets[choice])
+			callback(build_go_test_args(arg_presets[choice]))
 		end
 	end)
 end
@@ -75,10 +108,8 @@ return {
 		{
 			"<leader>ta",
 			function()
-				select_preset(function(args)
-					local test_args = vim.deepcopy(args)
-					table.insert(test_args, 1, "-args")
-					require("neotest").run.run({ extra_args = { go_test_args = test_args } })
+				select_preset(function(go_test_args)
+					require("neotest").run.run({ extra_args = { go_test_args = go_test_args } })
 				end)
 			end,
 			desc = "Run Nearest with Args (Neotest)",
@@ -150,11 +181,11 @@ return {
 			["neotest-golang"] = {
 
 				warn_test_name_dupes = false,
-				go_test_args = {
-					"-v",
-					"-race",
-					"-count=1",
-					"-timeout=200s",
+				go_test_args = base_go_test_args,
+				-- Env vars required by tagged tests (e.g. integration tests).
+				-- Reads from the shell env at nvim startup, never hardcode secret values here.
+				env = {
+					-- MY_ENV_VAR = os.getenv("MY_ENV_VAR"),
 				},
 				dap_go_enabled = true,
 			},
