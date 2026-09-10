@@ -2,6 +2,9 @@ return {
 	"saghen/blink.cmp",
 	opts = {
 		completion = {
+			documentation = {
+				treesitter_highlighting = false,
+			},
 			list = {
 				selection = {
 					preselect = false,

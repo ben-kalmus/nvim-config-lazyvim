@@ -24,8 +24,8 @@ return {
 		signs_staged_enable = true,
 		signcolumn = true, -- Toggle with `:Gitsigns toggle_signs`
 		watch_gitdir = {
-			follow_files = true,
-			interval = 5000,
+			enable = false,
+			follow_files = false,
 		},
 		-- add counter to display num of removed lines
 		signs_staged = {
