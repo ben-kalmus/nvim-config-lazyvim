@@ -39,6 +39,8 @@ opt.clipboard = "unnamedplus"
 
 opt.autoread = true
 opt.jumpoptions:append("clean")
-opt.sessionoptions = "buffers,curdir,tabpages,winsize,help,globals,skiprtp,folds"
+-- `folds` deliberately omitted: it serialised `foldmethod=diff` from diffview
+-- tabs into ordinary file windows on restore, fighting the treesitter foldexpr.
+opt.sessionoptions = "buffers,curdir,tabpages,winsize,help,globals,skiprtp"
 
 opt.listchars = { tab = "· " }
