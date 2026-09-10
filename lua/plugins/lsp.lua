@@ -210,8 +210,6 @@ return {
 								shadow = true,
 							},
 							staticcheck = true,
-							experimentalWorkspaceModule = false,
-							allowImplicitNetworkAccess = true,
 							codelenses = {
 								gc_details = false,
 								generate = true,
