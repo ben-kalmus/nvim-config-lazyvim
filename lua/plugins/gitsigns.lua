@@ -20,7 +20,6 @@ return {
 	},
 	opts = {
 		max_file_length = 20000,
-		_threaded_diff = true, -- Fix for "Not in async context" error
 		signs_staged_enable = true,
 		signcolumn = true, -- Toggle with `:Gitsigns toggle_signs`
 		watch_gitdir = {
