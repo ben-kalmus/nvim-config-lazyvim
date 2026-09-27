@@ -17,6 +17,14 @@ return {
 			end,
 			desc = "Toggle gitsigns base (index ↔ last commit)",
 		},
+		{
+			"<leader>cG",
+			function()
+				local gs = require("gitsigns")
+				gs.reset_base(true)
+			end,
+			desc = "Gitsigns reset",
+		},
 	},
 	opts = {
 		max_file_length = 20000,
