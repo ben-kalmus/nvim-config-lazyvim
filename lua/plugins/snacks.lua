@@ -31,8 +31,8 @@ return {
 			-- Keep previews, but remove work that scales with preview size and result count.
 			picker = {
 				enabled = true,
-				limit = 5000,
-				limit_live = 5000,
+				limit = 10000,
+				limit_live = 10000,
 				matcher = {
 					filename_bonus = false,
 					file_pos = false,
@@ -69,9 +69,23 @@ return {
 				},
 				sources = {
 					buffers = { unloaded = false },
-					files = { limit = 5000, limit_live = 5000 },
-					grep = { limit = 5000, limit_live = 5000 },
-					grep_word = { limit = 5000, limit_live = 5000 },
+					files = {
+						limit = 10000,
+						limit_live = 10000,
+						exclude = {
+							"node_modules",
+							"dist",
+							"build",
+							"vendor",
+							"target",
+							".venv",
+							"__pycache__",
+							"coverage",
+							".terraform",
+						},
+					},
+					grep = { limit = 10000, limit_live = 10000 },
+					grep_word = { limit = 10000, limit_live = 10000 },
 					explorer = {
 						diagnostics = true,
 						follow_file = true,
